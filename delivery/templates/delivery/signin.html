@@ -1,0 +1,465 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meal Buddy | Sign In</title>
+    <link rel="stylesheet" href="{% static 'delivery/css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        .password-toggle {
+            position: absolute;
+            right: 20px;
+            top: 20px;
+            cursor: pointer;
+            color: rgba(255, 255, 255, 0.3);
+            transition: color 0.3s ease;
+            z-index: 10;
+        }
+        .password-toggle:hover {
+            color: var(--neon-green);
+        }
+        .auth-card {
+            animation: float 6s ease-in-out infinite;
+        }
+        .success-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 31, 23, 0.95);
+            backdrop-filter: blur(15px);
+            z-index: 1000;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        .success-overlay.active {
+            display: flex;
+            opacity: 1;
+        }
+        .success-icon {
+            width: 100px;
+            height: 100px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: white;
+            box-shadow: 0 0 50px rgba(16, 185, 129, 0.6);
+            margin-bottom: 24px;
+            animation: scaleIn 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        @keyframes scaleIn {
+            from { transform: scale(0); opacity: 0; }
+            to { transform: scale(1); opacity: 1; }
+        }
+        .glow-border {
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            box-shadow: 0 0 20px rgba(16, 185, 129, 0.1);
+        }
+
+        /* ── Modern Toast Notification ── */
+        .toast-container {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 380px;
+            width: calc(100% - 48px);
+            pointer-events: none;
+        }
+        .toast-card {
+            pointer-events: auto;
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            border-radius: 18px;
+            padding: 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(16, 185, 129, 0.08);
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .toast-card.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .toast-card.hide {
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+        .toast-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #10b981;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.15);
+        }
+        .toast-content {
+            flex: 1;
+        }
+        .toast-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: white;
+            margin-bottom: 2px;
+        }
+        .toast-message {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.4;
+        }
+        .toast-close {
+            background: transparent;
+            border: none;
+            color: rgba(255, 255, 255, 0.3);
+            cursor: pointer;
+            padding: 4px;
+            font-size: 0.85rem;
+            transition: color 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 6px;
+            margin-top: -2px;
+        }
+        .toast-close:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        /* ── Role Selector Styling ── */
+        .role-selector-container {
+            position: relative;
+            display: flex;
+            padding: 4px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 9999px;
+            margin-bottom: 28px;
+            max-width: 280px;
+            margin-left: auto;
+            margin-right: auto;
+            backdrop-filter: blur(10px);
+        }
+        .role-indicator {
+            position: absolute;
+            top: 4px;
+            bottom: 4px;
+            left: 4px;
+            width: calc(50% - 4px);
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            border-radius: 9999px;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+            z-index: 1;
+        }
+        .role-btn {
+            position: relative;
+            z-index: 2;
+            flex: 1;
+            padding: 8px 16px;
+            text-align: center;
+            font-size: 0.8rem;
+            font-weight: 700;
+            color: rgba(255, 255, 255, 0.5);
+            background: transparent;
+            border: none;
+            cursor: pointer;
+            transition: color 0.3s ease;
+            outline: none;
+        }
+        .role-btn.active {
+            color: white;
+        }
+    </style>
+</head>
+<body>
+    {% if messages %}
+    <div class="toast-container" id="toastContainer">
+        {% for message in messages %}
+        <div class="toast-card" data-message="{{ message|escapejs }}">
+            <div class="toast-icon">
+                <i class="fas fa-check-circle"></i>
+            </div>
+            <div class="toast-content">
+                <div class="toast-title">Success</div>
+                <div class="toast-message">{{ message }}</div>
+            </div>
+            <button class="toast-close" onclick="dismissToast(this.parentElement)">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        {% endfor %}
+    </div>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const toasts = document.querySelectorAll('.toast-card');
+            const seenMessages = new Set();
+            
+            toasts.forEach((toast, index) => {
+                const messageText = toast.getAttribute('data-message');
+                
+                // Prevent duplicate notifications
+                if (seenMessages.has(messageText)) {
+                    toast.remove();
+                    return;
+                }
+                seenMessages.add(messageText);
+                
+                // Trigger slide-up and fade-in animation
+                setTimeout(() => {
+                    toast.classList.add('show');
+                }, index * 150);
+                
+                // Auto-hide after 3 seconds
+                setTimeout(() => {
+                    dismissToast(toast);
+                }, 3000 + (index * 150));
+            });
+        });
+
+        function dismissToast(toast) {
+            if (!toast) return;
+            toast.classList.remove('show');
+            toast.classList.add('hide');
+            setTimeout(() => {
+                toast.remove();
+                const container = document.getElementById('toastContainer');
+                if (container && container.querySelectorAll('.toast-card').length === 0) {
+                    container.remove();
+                }
+            }, 500);
+        }
+    </script>
+    {% endif %}
+
+    <div class="hero-container auth-container">
+        <!-- Floating Food Background - Symmetrical Placement -->
+        <img src="{% static 'delivery/images/biryani.png' %}" class="auth-bg-food animate-float" style="top: 8%; left: 8%; transform: rotate(-15deg); animation-delay: 0s;">
+        <img src="{% static 'delivery/images/burger.png' %}" class="auth-bg-food animate-float" style="top: 12%; right: 8%; transform: rotate(10deg); animation-delay: 1s;">
+        <img src="{% static 'delivery/images/pasta.png' %}" class="auth-bg-food animate-float" style="bottom: 12%; left: 10%; transform: rotate(20deg); animation-delay: 2s;">
+        <img src="{% static 'delivery/images/butter_chicken.png' %}" class="auth-bg-food animate-float" style="bottom: 8%; right: 12%; transform: rotate(-5deg); animation-delay: 1.5s;">
+        
+        <!-- Additional Symmetrical Accents -->
+        <img src="{% static 'delivery/images/shawarma.png' %}" class="auth-bg-food animate-float" style="top: 45%; left: 2%; transform: rotate(30deg); opacity: 0.3; animation-delay: 2.5s;">
+        <img src="{% static 'delivery/images/chicken_mandi.png' %}" class="auth-bg-food animate-float" style="top: 40%; right: 2%; transform: rotate(-20deg); opacity: 0.3; animation-delay: 0.5s;">
+        <img src="{% static 'delivery/images/smoothie_bowl.png' %}" class="auth-bg-food animate-float" style="top: 2%; left: 45%; transform: rotate(5deg); opacity: 0.2; animation-delay: 3s;">
+        <img src="{% static 'delivery/images/rice_bowl.png' %}" class="auth-bg-food animate-float" style="bottom: 2%; right: 45%; transform: rotate(-10deg); opacity: 0.2; animation-delay: 1.2s;">
+
+        <!-- Sign In Card -->
+        <div class="signup-card auth-card glow-border">
+            <!-- Logo Reuse -->
+            <div class="logo-section mb-10 flex flex-col items-center">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-utensils text-black text-sm"></i>
+                    </div>
+                    <span>Meal Buddy</span>
+                </div>
+            </div>
+
+            <div class="text-center mb-8">
+                <h2 class="text-4xl font-bold mb-3 tracking-tight">Welcome Back</h2>
+                <p class="text-gray-400 text-base" id="authSubtitle">Sign in and continue ordering your favorite meals.</p>
+            </div>
+
+            <!-- Segmented Role Selector -->
+            <div class="role-selector-container">
+                <div class="role-indicator" id="roleIndicator"></div>
+                <button type="button" id="btnCustomer" class="role-btn active">Customer</button>
+                <button type="button" id="btnAdmin" class="role-btn">Admin / Staff</button>
+            </div>
+
+            <form action="{% url 'signin' %}" method="post" id="signinForm">
+                {% csrf_token %}
+                
+                <!-- Username Field -->
+                <div class="form-group">
+                    <i class="fas fa-user"></i>
+                    <input type="text" name="username" id="usernameInput" class="auth-input" placeholder="Username or Email" required>
+                </div>
+
+                <!-- Password Field -->
+                <div class="form-group">
+                    <i class="fas fa-lock"></i>
+                    <input type="password" name="password" id="password" class="auth-input" placeholder="Password" required>
+                    <div class="password-toggle" id="togglePassword">
+                        <i class="fas fa-eye"></i>
+                    </div>
+                </div>
+
+                <div id="errorBox" class="text-red-400 text-sm mb-6 text-center {% if not error %}hidden{% endif %} bg-red-900/20 py-2 rounded-lg border border-red-900/50 animate-pulse">
+                    {{ error }}
+                </div>
+
+                <!-- Sign In Button -->
+                <button type="submit" class="cta-btn btn-full flex items-center justify-center py-4 text-lg" id="submitBtn">
+                    <div class="loading-spinner" id="spinner"></div>
+                    <span id="btnText">Sign In</span>
+                </button>
+
+                <!-- Signup Link -->
+                <div class="text-center mt-8">
+                    <p class="text-gray-400 text-sm">
+                        Don’t have an account? 
+                        <a href="{% url 'open_signup' %}" class="text-emerald-400 font-bold hover:text-emerald-300 transition-colors ml-1">Create Account</a>
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Success Overlay -->
+    <div class="success-overlay" id="successOverlay">
+        <div class="success-icon">
+            <i class="fas fa-check"></i>
+        </div>
+        <h2 class="text-4xl font-bold mt-4 text-white text-center">Login Successful!</h2>
+        <p class="text-gray-400 mt-4 text-xl text-center">Returning to your delicious journey...</p>
+        
+        <div class="mt-12 flex space-x-2">
+            <div class="w-3 h-3 bg-emerald-500 rounded-full animate-bounce" style="animation-delay: 0.1s"></div>
+            <div class="w-3 h-3 bg-emerald-500 rounded-full animate-bounce" style="animation-delay: 0.2s"></div>
+            <div class="w-3 h-3 bg-emerald-500 rounded-full animate-bounce" style="animation-delay: 0.3s"></div>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('signinForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const btnText = document.getElementById('btnText');
+        const spinner = document.getElementById('spinner');
+        const errorBox = document.getElementById('errorBox');
+        const successOverlay = document.getElementById('successOverlay');
+        const togglePassword = document.getElementById('togglePassword');
+        const passwordInput = document.getElementById('password');
+
+        // Role Selector Toggle Logic
+        const btnCustomer = document.getElementById('btnCustomer');
+        const btnAdmin = document.getElementById('btnAdmin');
+        const roleIndicator = document.getElementById('roleIndicator');
+        const authSubtitle = document.getElementById('authSubtitle');
+        const usernameInput = document.getElementById('usernameInput');
+
+        btnCustomer.addEventListener('click', () => {
+            btnCustomer.classList.add('active');
+            btnAdmin.classList.remove('active');
+            roleIndicator.style.transform = 'translateX(0)';
+            authSubtitle.innerText = 'Sign in and continue ordering your favorite meals.';
+            usernameInput.placeholder = 'Username or Email';
+            errorBox.classList.add('hidden');
+        });
+
+        btnAdmin.addEventListener('click', () => {
+            btnAdmin.classList.add('active');
+            btnCustomer.classList.remove('active');
+            roleIndicator.style.transform = 'translateX(100%)';
+            authSubtitle.innerText = 'Sign in to access the system administration panel.';
+            usernameInput.placeholder = 'Admin Username or Email';
+            errorBox.classList.add('hidden');
+        });
+
+        // Password Visibility Toggle
+        togglePassword.addEventListener('click', function() {
+            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+            passwordInput.setAttribute('type', type);
+            this.querySelector('i').classList.toggle('fa-eye');
+            this.querySelector('i').classList.toggle('fa-eye-slash');
+        });
+
+        // Form Submission - AJAX for Cinematic Feel
+        form.addEventListener('submit', async function(e) {
+            e.preventDefault();
+
+            // Show loading state
+            submitBtn.disabled = true;
+            spinner.style.display = 'block';
+            btnText.innerText = 'Authenticating...';
+            submitBtn.style.opacity = '0.8';
+            errorBox.classList.add('hidden');
+
+            const formData = new FormData(form);
+            
+            try {
+                const response = await fetch('/signin', {
+                    method: 'POST',
+                    body: formData,
+                    headers: {
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    }
+                });
+
+                const clone = response.clone();
+                console.log(await clone.text());
+
+                const data = await response.json();
+
+                if (data.success) {
+                    // Show success overlay with animation
+                    successOverlay.classList.add('active');
+                    
+                    // Redirect after a short delay for the animation to play out
+                    setTimeout(() => {
+                        window.location.href = data.redirect;
+                    }, 2200);
+                } else {
+                    // Reset button state and show error
+                    submitBtn.disabled = false;
+                    spinner.style.display = 'none';
+                    btnText.innerText = 'Sign In';
+                    submitBtn.style.opacity = '1';
+                    
+                    document.getElementById('errorBox').innerText = data.message;
+                    errorBox.classList.remove('hidden');
+                }
+            } catch (error) {
+                console.error('AUTH ERROR:', error);
+                document.getElementById('errorBox').innerText = "Connection error. Please try again.";
+                errorBox.classList.remove('hidden');
+                submitBtn.disabled = false;
+                spinner.style.display = 'none';
+                btnText.innerText = 'Sign In';
+                submitBtn.style.opacity = '1';
+            }
+        });
+    </script>
+
+    <!-- Parallax Effect for Background Food -->
+    <script>
+        document.addEventListener('mousemove', (e) => {
+            const foods = document.querySelectorAll('.auth-bg-food');
+            const x = (window.innerWidth / 2 - e.pageX) / 80;
+            const y = (window.innerHeight / 2 - e.pageY) / 80;
+
+            foods.forEach((food, index) => {
+                const depth = (index % 4 + 1) * 0.4;
+                food.style.transform = `translateX(${x * depth}px) translateY(${y * depth}px) rotate(${index * 15}deg)`;
+            });
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,366 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meal Buddy | Checkout</title>
+    <link rel="stylesheet" href="{% static 'delivery/css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+</head>
+<body class="bg-[#050505] relative">
+    <!-- Ambient Background Glows -->
+    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-30">
+        <div class="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-emerald-600/20 rounded-full blur-[120px] animate-pulse" style="animation-duration: 8s;"></div>
+        <div class="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-emerald-900/30 rounded-full blur-[150px] animate-pulse" style="animation-duration: 12s; animation-delay: 2s;"></div>
+    </div>
+
+    <!-- Navbar -->
+    <header class="relative z-50">
+        <div class="logo-section">
+            <div class="logo">
+                <div class="logo-icon"><i class="fas fa-utensils text-black text-sm"></i></div>
+                <span>Meal Buddy</span>
+            </div>
+            <span class="tagline">Your Favorite Food, Delivered.</span>
+        </div>
+        <div class="nav-links">
+            <a href="{% url 'show_cart' username %}"><i class="fas fa-arrow-left mr-1"></i>Back to Cart</a>
+            <a href="{% url 'logout' %}" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+        </div>
+    </header>
+
+    <main class="page-wrapper">
+        <div class="max-w-5xl mx-auto px-6">
+            <div class="mb-8">
+                {% if payment_for == 'dining' %}
+                <h1 class="text-4xl font-extrabold font-['Plus_Jakarta_Sans']">
+                    Dining <span class="text-yellow-500 highlight">Reservation</span>
+                </h1>
+                <p class="text-gray-400 mt-2">Secure your table at {{ dining_restaurant.name }}.</p>
+                {% else %}
+                <h1 class="text-4xl font-extrabold font-['Plus_Jakarta_Sans']">
+                    Secure <span class="text-emerald-500 highlight">Checkout</span>
+                </h1>
+                <p class="text-gray-400 mt-2">Review your order and complete payment safely.</p>
+                {% endif %}
+            </div>
+
+            {% if error %}
+            <!-- Empty cart error -->
+            <div class="empty-state">
+                <div class="empty-icon"><i class="fas fa-shopping-cart"></i></div>
+                <h2 class="text-xl font-bold text-red-400 mb-3">{{ error }}</h2>
+                <a href="{% url 'dashboard' username %}" class="cta-btn mt-4">Browse Restaurants</a>
+            </div>
+
+            {% else %}
+            <div class="grid grid-cols-1 lg:grid-cols-5 gap-10">
+
+                <!-- Left: Order/Booking Details -->
+                <div class="lg:col-span-3">
+                    {% if payment_for == 'dining' %}
+                    <div class="summary-card mb-6 border-yellow-500/20" style="background: rgba(234,179,8,0.03);">
+                        <h2 class="text-lg font-bold mb-5 flex items-center gap-2">
+                            <i class="fas fa-calendar-check text-yellow-500"></i> Reservation Summary
+                        </h2>
+                        <div class="summary-row">
+                            <span>Date & Time</span>
+                            <span class="font-semibold text-white">{{ pending.date }} at {{ pending.time }}</span>
+                        </div>
+                        <div class="summary-row">
+                            <span>Guests</span>
+                            <span class="font-semibold text-white">{{ pending.guests }} People</span>
+                        </div>
+                        {% if pending.occasion %}
+                        <div class="summary-row">
+                            <span>Occasion</span>
+                            <span class="font-semibold text-white">{{ pending.occasion }}</span>
+                        </div>
+                        {% endif %}
+                        <div class="summary-row total mt-4">
+                            <span>Reservation Fee</span>
+                            <span class="text-3xl"><span class="font-light text-yellow-500 mr-1 opacity-80 text-2xl">₹</span>{{ pending.reservation_fee }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Restaurant Details -->
+                    <div class="summary-card border-yellow-500/20">
+                        <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+                            <i class="fas fa-utensils text-yellow-500"></i> Restaurant
+                        </h2>
+                        <div class="flex items-start gap-3">
+                            <img src="{{ dining_restaurant.image }}" class="w-16 h-16 rounded-xl object-cover border border-yellow-500/30">
+                            <div>
+                                <div class="font-semibold text-white text-lg">{{ dining_restaurant.name }}</div>
+                                <div class="text-gray-400 text-sm mt-1"><i class="fas fa-map-marker-alt text-yellow-500/70"></i> {{ dining_restaurant.address }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="summary-card mb-6">
+                        <h2 class="text-lg font-bold mb-5 flex items-center gap-2">
+                            <i class="fas fa-list-ul text-emerald-400"></i> Order Items
+                        </h2>
+                        {% for item in cart_items %}
+                        <div class="summary-row">
+                            <span>{{ item.name }}</span>
+                            <span class="font-semibold text-white"><span class="font-light text-emerald-500 mr-1 opacity-80">₹</span>{{ item.price }}</span>
+                        </div>
+                        {% endfor %}
+                        <div class="summary-row total">
+                            <span>Total</span>
+                            <span class="text-3xl"><span class="font-light text-emerald-500 mr-1 opacity-80 text-2xl">₹</span>{{ total_price }}</span>
+                        </div>
+                    </div>
+
+                    <!-- Delivery Address -->
+                    <div class="summary-card">
+                        <h2 class="text-lg font-bold mb-4 flex items-center gap-2">
+                            <i class="fas fa-location-dot text-emerald-400"></i> Delivery Address
+                        </h2>
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 rounded-xl flex items-center justify-center flex-shrink-0"
+                                 style="background:rgba(16,185,129,0.15);border:1px solid rgba(16,185,129,0.3);">
+                                <i class="fas fa-home text-emerald-400 text-sm"></i>
+                            </div>
+                            <div>
+                                <div class="font-semibold text-white">{{ username }}</div>
+                                <div class="text-gray-400 text-sm mt-1">{{ customer.address }}</div>
+                                <div class="text-gray-500 text-xs mt-1">{{ customer.mobile }}</div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Right: Payment -->
+                <div class="lg:col-span-2">
+                    <div class="summary-card {% if payment_for == 'dining' %}border-yellow-500/20{% endif %}">
+                        <h2 class="text-lg font-bold mb-6 flex items-center gap-2">
+                            <i class="fas fa-shield-halved {% if payment_for == 'dining' %}text-yellow-500{% else %}text-emerald-400{% endif %}"></i> Payment
+                        </h2>
+                        <div class="flex items-center gap-3 p-4 rounded-xl mb-6"
+                             style="{% if payment_for == 'dining' %}background:rgba(234,179,8,0.07);border:1px solid rgba(234,179,8,0.2);{% else %}background:rgba(16,185,129,0.07);border:1px solid rgba(16,185,129,0.2);{% endif %}">
+                            <i class="fas fa-lock {% if payment_for == 'dining' %}text-yellow-500{% else %}text-emerald-400{% endif %}"></i>
+                            <span class="text-sm text-gray-300">256-bit SSL encrypted & secured by Razorpay</span>
+                        </div>
+
+                        {% if payment_for != 'dining' %}
+                        <!-- Promo Code (Checkout) -->
+                        <div class="mb-6 relative" id="checkoutPromoContainer">
+                            <input type="text" id="promoInput" placeholder="Got a Promo Code?" class="w-full bg-white/5 border border-white/10 rounded-xl py-3 pl-4 pr-24 text-sm text-white outline-none focus:border-emerald-500 transition-colors uppercase">
+                            <button id="applyPromoBtn" class="absolute right-1 top-1 bottom-1 bg-emerald-500 text-black font-bold px-4 rounded-lg text-xs hover:bg-emerald-400 transition-colors">Apply</button>
+                        </div>
+                        <div id="promoMessage" class="text-xs mb-4 hidden"></div>
+
+                        <div id="discountDisplay" class="summary-row text-emerald-400 hidden">
+                            <span><i class="fas fa-tag mr-1"></i> Discount</span>
+                            <span id="discountVal"></span>
+                        </div>
+                        {% endif %}
+
+                        <div class="summary-row total mb-6 border-t border-white/10 pt-4 mt-2">
+                            <span>Amount to Pay</span>
+                            <span class="text-4xl {% if payment_for == 'dining' %}text-yellow-500{% else %}text-emerald-400{% endif %} font-extrabold"><span class="font-light {% if payment_for == 'dining' %}text-yellow-600{% else %}text-emerald-500{% endif %} mr-1 opacity-80 text-3xl">₹</span><span id="finalTotalPay">{{ total_price }}</span></span>
+                        </div>
+
+                        {% if order_id %}
+                        {% if payment_for == 'dining' %}
+                        <button id="rzp-button" class="cta-btn btn-full text-center text-lg py-4 shadow-[0_10px_30px_rgba(234,179,8,0.3)] hover:shadow-[0_15px_40px_rgba(234,179,8,0.5)] transition-all animate-pulse" style="background: linear-gradient(135deg, #facc15, #ca8a04); color: #000; border: none; animation-duration: 2s;">
+                            <i class="fas fa-lock mr-2"></i> Pay <span class="font-light mx-1 opacity-80">₹</span><span id="rzpBtnAmount">{{ total_price }}</span>
+                        </button>
+                        {% else %}
+                        <button id="rzp-button" class="cta-btn btn-full text-center text-lg py-4 shadow-[0_10px_30px_rgba(16,185,129,0.3)] hover:shadow-[0_15px_40px_rgba(16,185,129,0.5)] transition-all animate-pulse" style="animation-duration: 2s;">
+                            <i class="fas fa-lock mr-2"></i> Pay <span class="font-light mx-1 opacity-80">₹</span><span id="rzpBtnAmount">{{ total_price }}</span>
+                        </button>
+                        {% endif %}
+                        {% else %}
+                        <!-- Fallback: direct order without payment gateway -->
+                        <form action="{% url 'orders' username %}" method="post">
+                            {% csrf_token %}
+                            <input type="hidden" name="payment_for" value="{{ payment_for }}">
+                            <button type="submit" class="cta-btn btn-full text-center">
+                                <i class="fas fa-check-circle mr-2"></i> Confirm Booking
+                            </button>
+                        </form>
+                        {% endif %}
+
+                        <div class="flex justify-center gap-4 mt-6 opacity-50">
+                            <i class="fab fa-cc-visa text-2xl"></i>
+                            <i class="fab fa-cc-mastercard text-2xl"></i>
+                            <i class="fab fa-cc-amex text-2xl"></i>
+                            <i class="fas fa-mobile-alt text-2xl"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+
+    <footer class="py-10 border-t border-white/5 bg-black/50 text-center text-gray-500 text-sm mt-12">
+        <p>&copy; 2026 Meal Buddy. All rights reserved.</p>
+    </footer>
+
+    {% if order_id %}
+    <script>
+        let currentTotal = parseFloat("{{ total_price }}");
+        let finalAmountForRzp = currentTotal * 100;
+        let appliedPromoCode = "";
+
+        // Check if promo was applied in cart
+        const savedPromoStr = sessionStorage.getItem('appliedPromo');
+        if (savedPromoStr) {
+            try {
+                const savedPromo = JSON.parse(savedPromoStr);
+                if(savedPromo.success) {
+                    applyDiscountToUI(savedPromo);
+                }
+            } catch(e) {}
+        }
+
+        // Apply Promo Logic
+        const applyPromoBtn = document.getElementById('applyPromoBtn');
+        if (applyPromoBtn) {
+            applyPromoBtn.addEventListener('click', async () => {
+                const code = document.getElementById('promoInput').value;
+                const btn = document.getElementById('applyPromoBtn');
+                const msg = document.getElementById('promoMessage');
+                
+                if(!code) return;
+                
+                btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+                btn.disabled = true;
+
+                try {
+                    const response = await fetch(`{% url "apply_promo" username %}?code=${code}&total=${currentTotal}`);
+                    const data = await response.json();
+                    
+                    msg.classList.remove('hidden');
+                    
+                    if(data.success) {
+                        applyDiscountToUI(data);
+                        sessionStorage.setItem('appliedPromo', JSON.stringify(data));
+                    } else {
+                        msg.innerHTML = `<i class="fas fa-exclamation-circle mr-1"></i> ${data.message}`;
+                        msg.className = "text-xs mb-4 text-red-400 p-2 bg-red-500/10 rounded-lg border border-red-500/20 animate-[fadeIn_0.3s_ease-out]";
+                        btn.innerHTML = 'Apply';
+                        btn.disabled = false;
+                    }
+                } catch (error) {
+                    console.error(error);
+                    btn.innerHTML = 'Apply';
+                    btn.disabled = false;
+                }
+            });
+        }
+
+        function applyDiscountToUI(data) {
+            const btn = document.getElementById('applyPromoBtn');
+            const msg = document.getElementById('promoMessage');
+            const discountRow = document.getElementById('discountDisplay');
+            const discountVal = document.getElementById('discountVal');
+            const totalSpan = document.getElementById('finalTotalPay');
+            const rzpBtnText = document.getElementById('rzpBtnAmount');
+
+            msg.classList.remove('hidden');
+            msg.innerHTML = `<i class="fas fa-check-circle mr-1"></i> ${data.message} <span class="font-bold text-white ml-1">You saved ₹${data.discount}!</span>`;
+            msg.className = "text-xs mb-4 text-emerald-400 p-2 bg-emerald-500/10 rounded-lg border border-emerald-500/20 animate-[fadeIn_0.3s_ease-out]";
+            
+            discountRow.classList.remove('hidden');
+            discountVal.innerText = `-₹${data.discount}`;
+            
+            const newTotal = (currentTotal - data.discount).toFixed(2);
+            totalSpan.innerText = newTotal;
+            
+            if(rzpBtnText) rzpBtnText.innerText = newTotal;
+            finalAmountForRzp = Math.round(newTotal * 100);
+            appliedPromoCode = data.code;
+
+            // Update razorpay options
+            options.amount = finalAmountForRzp;
+
+            totalSpan.parentElement.parentElement.classList.add('animate-pulse');
+            setTimeout(() => {
+                totalSpan.parentElement.parentElement.classList.remove('animate-pulse');
+            }, 1000);
+            
+            btn.innerHTML = 'Applied <i class="fas fa-check ml-1"></i>';
+            btn.classList.replace('bg-emerald-500', 'bg-white/10');
+            btn.classList.replace('text-black', 'text-emerald-400');
+        }
+
+        var options = {
+            "key": "{{ razorpay_key_id }}",
+            "amount": finalAmountForRzp,
+            "currency": "INR",
+            "name": "Meal Buddy",
+            "description": "Food Order Payment",
+            "image": "",
+            "order_id": "{{ order_id }}",
+            "handler": function (response) {
+                // Post payment details to orders view to persist the order
+                const form = document.createElement('form');
+                form.method = 'POST';
+                form.action = "{% url 'orders' username %}";
+
+                const csrfInput = document.createElement('input');
+                csrfInput.type = 'hidden';
+                csrfInput.name = 'csrfmiddlewaretoken';
+                csrfInput.value = '{{ csrf_token }}';
+                form.appendChild(csrfInput);
+
+                const paymentId = document.createElement('input');
+                paymentId.type = 'hidden';
+                paymentId.name = 'razorpay_payment_id';
+                paymentId.value = response.razorpay_payment_id;
+                form.appendChild(paymentId);
+
+                const orderId = document.createElement('input');
+                orderId.type = 'hidden';
+                orderId.name = 'razorpay_order_id';
+                orderId.value = response.razorpay_order_id;
+                form.appendChild(orderId);
+                
+                const paymentForInput = document.createElement('input');
+                paymentForInput.type = 'hidden';
+                paymentForInput.name = 'payment_for';
+                paymentForInput.value = '{{ payment_for }}';
+                form.appendChild(paymentForInput);
+
+                // Pass the new final total to orders view
+                const actualTotal = document.createElement('input');
+                actualTotal.type = 'hidden';
+                actualTotal.name = 'discounted_total';
+                actualTotal.value = finalAmountForRzp / 100;
+                form.appendChild(actualTotal);
+
+                // Clear session storage promo
+                sessionStorage.removeItem('appliedPromo');
+
+                document.body.appendChild(form);
+                form.submit();
+            },
+            "prefill": {
+                "name": "{{ username }}",
+                "email": "{{ customer.email }}",
+                "contact": "{{ customer.mobile }}"
+            },
+            "theme": {
+                "color": "{% if payment_for == 'dining' %}#facc15{% else %}#10b981{% endif %}"
+            }
+        };
+        var rzp = new Razorpay(options);
+        document.getElementById('rzp-button').onclick = function(e) {
+            rzp.open();
+            e.preventDefault();
+        };
+    </script>
+    {% endif %}
+</body>
+</html>

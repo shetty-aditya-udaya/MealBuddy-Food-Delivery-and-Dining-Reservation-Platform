@@ -1,0 +1,103 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meal Buddy | Order History</title>
+    <link rel="stylesheet" href="{% static 'delivery/css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-[#050505] relative">
+    <!-- Ambient Background Glows -->
+    <div class="fixed inset-0 pointer-events-none z-0 overflow-hidden opacity-30">
+        <div class="absolute top-[-10%] right-[-10%] w-[500px] h-[500px] bg-emerald-600/20 rounded-full blur-[120px] animate-pulse" style="animation-duration: 8s;"></div>
+        <div class="absolute bottom-[-10%] left-[-10%] w-[600px] h-[600px] bg-emerald-900/30 rounded-full blur-[150px] animate-pulse" style="animation-duration: 12s; animation-delay: 2s;"></div>
+    </div>
+
+    <!-- Navbar -->
+    <header class="relative z-50">
+        <div class="logo-section">
+            <div class="logo">
+                <div class="logo-icon"><i class="fas fa-utensils text-black text-sm"></i></div>
+                <span>Meal Buddy</span>
+            </div>
+            <span class="tagline">Your Favorite Food, Delivered.</span>
+        </div>
+        <div class="nav-links">
+            <a href="{% url 'dashboard' username %}"><i class="fas fa-store mr-1"></i>Restaurants</a>
+            <a href="{% url 'show_cart' username %}"><i class="fas fa-shopping-cart mr-1"></i>Cart</a>
+            <a href="{% url 'logout' %}" class="logout-btn">
+                <i class="fas fa-sign-out-alt"></i> Logout
+            </a>
+            <div class="profile-btn"><i class="fas fa-user text-sm"></i></div>
+        </div>
+    </header>
+
+    <main class="page-wrapper">
+        <div class="max-w-4xl mx-auto px-6">
+            <div class="mb-10">
+                <h1 class="text-4xl font-extrabold font-['Plus_Jakarta_Sans']">
+                    My <span class="highlight">Orders</span>
+                </h1>
+                <p class="text-gray-400 mt-2">Your complete order history.</p>
+            </div>
+
+            {% if orders_list %}
+            {% for order in orders_list %}
+            <div class="order-card">
+                <div class="flex items-start justify-between flex-wrap gap-4 mb-4">
+                    <div>
+                        <span class="text-gray-500 text-xs uppercase tracking-wider">Order #{{ order.id }}</span>
+                        <h3 class="font-bold text-xl mt-1 text-emerald-400"><span class="font-light text-emerald-500 mr-1 opacity-80 text-lg">₹</span>{{ order.total_price }}</h3>
+                        <p class="text-gray-500 text-xs mt-1">
+                            <i class="fas fa-clock mr-1"></i>{{ order.created_at|date:"d M Y, h:i A" }}
+                        </p>
+                    </div>
+                    <span class="status-pill status-{{ order.status }}">
+                        {{ order.get_status_display }}
+                    </span>
+                </div>
+
+                <!-- Items Snapshot -->
+                <div class="bg-white/[0.02] rounded-xl p-4 mb-4">
+                    <p class="text-gray-500 text-xs uppercase tracking-wider mb-3">Items Ordered</p>
+                    {% for item in order.items_json %}
+                    <div class="flex justify-between text-sm py-1">
+                        <span class="text-gray-300">{{ item.name }}</span>
+                        <span class="text-gray-400">₹{{ item.price }}</span>
+                    </div>
+                    {% empty %}
+                    <p class="text-gray-600 text-sm">No item details available.</p>
+                    {% endfor %}
+                </div>
+
+                <div class="flex items-center justify-between gap-4 mt-4 pt-4 border-t border-white/5">
+                    <div class="flex items-center gap-2 text-xs text-gray-500">
+                        <i class="fas fa-location-dot text-emerald-500"></i>
+                        Delivered to: <span class="text-gray-300 ml-1">{{ order.address }}</span>
+                    </div>
+                    <a href="{% url 'dashboard' username %}" class="px-4 py-2 bg-emerald-500/10 text-emerald-400 text-xs font-bold rounded-full hover:bg-emerald-500 hover:text-black transition-colors border border-emerald-500/30">
+                        <i class="fas fa-redo-alt mr-1"></i> Reorder
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+
+            {% else %}
+            <div class="empty-state">
+                <div class="empty-icon"><i class="fas fa-receipt"></i></div>
+                <h2 class="text-2xl font-bold text-gray-400 mb-3">No orders yet</h2>
+                <p class="text-gray-600 mb-8">Looks like you haven't ordered anything yet.</p>
+                <a href="{% url 'dashboard' username %}" class="cta-btn">Start Ordering</a>
+            </div>
+            {% endif %}
+        </div>
+    </main>
+
+    <footer class="py-10 border-t border-white/5 bg-black/50 text-center text-gray-500 text-sm mt-12">
+        <p>&copy; 2026 Meal Buddy. All rights reserved.</p>
+    </footer>
+</body>
+</html>

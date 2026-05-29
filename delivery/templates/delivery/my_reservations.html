@@ -1,0 +1,176 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Reservations | Meal Buddy Dining</title>
+    <link rel="stylesheet" href="{% static 'delivery/css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #050505; color: #ffffff; }
+        .transparent-navbar {
+            position: fixed; top: 0; left: 0; width: 100%; z-index: 100;
+            background: rgba(5,5,5,0.9); backdrop-filter: blur(20px);
+            padding: 20px 0; border-bottom: 1px solid rgba(255,255,255,0.05);
+        }
+        .navbar-content { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0 40px; }
+        .logo { display: flex; align-items: center; gap: 10px; font-size: 1.5rem; font-weight: bold; color: white; text-decoration: none; }
+        .logo i { color: #eab308; }
+        .nav-links { display: flex; align-items: center; gap: 20px; }
+        .nav-links a { color: white; text-decoration: none; font-weight: 600; transition: color 0.3s; }
+        .nav-links a:hover { color: #eab308; }
+
+        .page-header { margin-top: 100px; padding: 40px 20px; text-align: center; }
+        .page-title { font-size: 3rem; font-weight: 800; text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-yellow-600; color: #eab308; margin-bottom: 10px; }
+        .page-subtitle { color: #9ca3af; font-size: 1.2rem; }
+
+        .res-container { max-width: 900px; margin: 0 auto 50px; px: 20px; }
+        
+        .res-card {
+            background: rgba(20, 20, 20, 0.6); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 20px; overflow: hidden;
+            display: flex; margin-bottom: 25px; transition: all 0.3s ease; position: relative;
+        }
+        .res-card:hover { transform: translateY(-5px); box-shadow: 0 15px 30px rgba(0,0,0,0.5), 0 0 15px rgba(234, 179, 8, 0.1); border-color: rgba(234, 179, 8, 0.3); }
+        
+        .res-date-box {
+            background: rgba(234, 179, 8, 0.1); width: 140px; display: flex; flex-direction: column;
+            align-items: center; justify-content: center; padding: 20px; border-right: 1px dashed rgba(255,255,255,0.1);
+        }
+        .r-month { color: #eab308; font-weight: bold; text-transform: uppercase; font-size: 1rem; }
+        .r-day { font-size: 2.5rem; font-weight: 900; color: white; line-height: 1; margin: 5px 0; }
+        .r-time { color: #d1d5db; font-size: 0.9rem; }
+
+        .res-details { padding: 25px; flex-grow: 1; }
+        .r-status { display: inline-block; padding: 4px 10px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; text-transform: uppercase; margin-bottom: 10px; }
+        .status-confirmed { background: rgba(16, 185, 129, 0.2); color: #34d399; border: 1px solid rgba(16, 185, 129, 0.3); }
+        .status-cancelled { background: rgba(239, 68, 68, 0.2); color: #f87171; border: 1px solid rgba(239, 68, 68, 0.3); }
+        
+        .r-title { font-size: 1.5rem; font-weight: bold; color: white; margin-bottom: 5px; }
+        .r-meta { color: #9ca3af; font-size: 0.95rem; display: flex; gap: 15px; margin-bottom: 15px; }
+        .r-meta span { display: flex; align-items: center; gap: 5px; }
+        
+        .r-id { font-family: monospace; color: #6b7280; font-size: 0.85rem; }
+
+        .res-actions { display: flex; align-items: center; justify-content: center; padding: 0 25px; gap: 10px; flex-direction: column; }
+        .btn-cancel {
+            background: transparent; color: #ef4444; border: 1px solid rgba(239, 68, 68, 0.5);
+            padding: 8px 16px; border-radius: 100px; font-size: 0.9rem; cursor: pointer; transition: all 0.3s;
+            text-decoration: none; text-align: center; width: 100%;
+        }
+        .btn-cancel:hover { background: rgba(239, 68, 68, 0.1); }
+        
+        .btn-qr {
+            background: rgba(255,255,255,0.1); color: white; border: 1px solid rgba(255,255,255,0.2);
+            padding: 8px 16px; border-radius: 100px; font-size: 0.9rem; cursor: pointer; transition: all 0.3s;
+            display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%;
+        }
+        .btn-qr:hover { background: white; color: black; }
+
+        /* QR Modal */
+        #qrModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 1000; align-items: center; justify-content: center; }
+        .qr-content { background: #111; padding: 40px; border-radius: 20px; text-align: center; border: 1px solid #eab308; max-width: 350px; width: 90%; position: relative; }
+        .close-qr { position: absolute; top: 15px; right: 20px; font-size: 1.5rem; cursor: pointer; color: #9ca3af; }
+        .qr-img { width: 200px; height: 200px; background: white; margin: 20px auto; display: flex; align-items: center; justify-content: center; border-radius: 10px; }
+    </style>
+</head>
+<body>
+
+    <header class="transparent-navbar">
+        <div class="navbar-content">
+            <a href="{% url 'dining_home' username %}" class="logo">
+                <i class="fas fa-arrow-left"></i> Meal Buddy Dining
+            </a>
+            <div class="nav-links">
+                <a href="{% url 'dashboard' username %}">Delivery</a>
+                <div title="{{username}}" style="width: 35px; height: 35px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center;"><i class="fas fa-user"></i></div>
+            </div>
+        </div>
+    </header>
+
+    <div class="page-header">
+        <h1 class="page-title">My Bookings</h1>
+        <p class="page-subtitle">Manage your dining experiences</p>
+    </div>
+
+    <div class="res-container">
+        {% for r in reservations %}
+        <div class="res-card">
+            <div class="res-date-box">
+                <span class="r-month">{{ r.booking_date|date:"M" }}</span>
+                <span class="r-day">{{ r.booking_date|date:"d" }}</span>
+                <span class="r-time">{{ r.booking_time|time:"h:i A" }}</span>
+            </div>
+            <div class="res-details">
+                {% if r.status == 'confirmed' %}
+                <span class="r-status status-confirmed">Confirmed</span>
+                {% elif r.status == 'cancelled' %}
+                <span class="r-status status-cancelled">Cancelled</span>
+                {% else %}
+                <span class="r-status" style="background: rgba(255,255,255,0.1); color: white;">{{ r.status }}</span>
+                {% endif %}
+                
+                <h3 class="r-title">{{ r.restaurant.name }}</h3>
+                <div class="r-meta">
+                    <span><i class="fas fa-user-friends"></i> {{ r.guests }} Guests</span>
+                    <span><i class="fas fa-chair"></i> Table {{ r.table.table_number|default:"TBD" }}</span>
+                </div>
+                <div class="r-id text-sm mb-2 flex items-center gap-4">
+                    <span>Booking ID: <span class="text-gray-300">#MB-D{{ r.id|stringformat:"04d" }}</span></span>
+                    {% if r.booking_reference %}
+                    <span>Ref: <span class="text-yellow-500">{{ r.booking_reference }}</span></span>
+                    {% endif %}
+                </div>
+                {% if r.payment_status == 'paid' %}
+                <div class="text-xs inline-flex items-center gap-1 bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 px-2 py-1 rounded">
+                    <i class="fas fa-check-circle"></i> Paid (₹{{ r.advance_amount }})
+                </div>
+                {% endif %}
+            </div>
+            <div class="res-actions">
+                {% if r.status == 'confirmed' %}
+                    {% if r.payment_status == 'paid' %}
+                    <button class="btn-qr" onclick="showQR('{{ r.booking_reference|default:r.id }}')"><i class="fas fa-qrcode"></i> Entry Pass</button>
+                    {% else %}
+                    <button class="btn-qr" style="opacity: 0.5; cursor: not-allowed;" title="Payment Required"><i class="fas fa-qrcode"></i> Pending Payment</button>
+                    {% endif %}
+                <a href="{% url 'cancel_reservation' r.id username %}" class="btn-cancel" onclick="return confirm('Are you sure you want to cancel this booking?');">Cancel</a>
+                {% endif %}
+            </div>
+        </div>
+        {% empty %}
+        <div style="text-align: center; padding: 50px 0;">
+            <i class="fas fa-calendar-times text-gray-600 text-6xl mb-4"></i>
+            <h2 class="text-2xl font-bold text-gray-400">No reservations found.</h2>
+            <p class="text-gray-500 mt-2 mb-6">Book a table to experience our premium dining.</p>
+            <a href="{% url 'dining_home' username %}" style="background: #eab308; color: black; padding: 12px 25px; border-radius: 100px; font-weight: bold; text-decoration: none;">Explore Restaurants</a>
+        </div>
+        {% endfor %}
+    </div>
+
+    <!-- QR Modal -->
+    <div id="qrModal">
+        <div class="qr-content">
+            <span class="close-qr" onclick="hideQR()">&times;</span>
+            <h3 style="font-size: 1.2rem; font-weight: bold;">Reservation Pass</h3>
+            <p style="color: #9ca3af; font-size: 0.9rem;" id="qrID"></p>
+            <div class="qr-img">
+                <i class="fas fa-qrcode text-black" style="font-size: 8rem;"></i>
+            </div>
+            <p style="color: #d1d5db; font-size: 0.85rem;">Show this code at the restaurant reception.</p>
+        </div>
+    </div>
+
+    <script>
+        function showQR(id) {
+            document.getElementById('qrID').innerText = id;
+            document.getElementById('qrModal').style.display = 'flex';
+        }
+        function hideQR() {
+            document.getElementById('qrModal').style.display = 'none';
+        }
+    </script>
+</body>
+</html>

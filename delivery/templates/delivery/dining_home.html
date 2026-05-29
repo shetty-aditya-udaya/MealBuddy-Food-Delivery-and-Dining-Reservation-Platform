@@ -1,0 +1,283 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meal Buddy | Dining Reservations</title>
+    <link rel="stylesheet" href="{% static 'delivery/css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #050505; color: #ffffff; }
+        
+        .transparent-navbar {
+            position: fixed; top: 0; left: 0; width: 100%; z-index: 1000;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 60%, rgba(0,0,0,0) 100%);
+            padding: 35px 0 55px 0; transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .navbar-content { display: flex; justify-content: space-between; align-items: flex-start; width: 100%; padding: 0 60px; }
+        .logo-section { display: flex; flex-direction: column; align-items: flex-start; gap: 6px; }
+        .logo { display: flex; align-items: center; gap: 12px; font-size: 1.8rem; font-weight: 800; font-family: 'Plus Jakarta Sans', sans-serif; color: white; letter-spacing: -0.5px; text-shadow: 0 2px 10px rgba(0,0,0,0.5); }
+        .logo-icon { width: 40px; height: 40px; background: linear-gradient(135deg, #facc15 0%, #ca8a04 100%); border-radius: 10px; display: flex; align-items: center; justify-content: center; color: #000; box-shadow: 0 4px 15px rgba(234, 179, 8, 0.4); font-size: 1.2rem; }
+        .tagline { font-size: 0.9rem; color: rgba(255, 255, 255, 0.8); font-weight: 500; letter-spacing: 0.5px; text-shadow: 0 1px 5px rgba(0,0,0,0.5); }
+        .nav-links { display: flex; align-items: center; gap: 32px; margin-top: 4px; }
+        .nav-link-item { color: rgba(255, 255, 255, 0.95); text-decoration: none; font-weight: 600; font-size: 1.1rem; transition: all 0.3s ease; display: flex; align-items: center; gap: 8px; text-shadow: 0 2px 8px rgba(0,0,0,0.6); }
+        .nav-link-item:hover { color: #facc15; transform: translateY(-2px); text-shadow: 0 0 15px rgba(250, 204, 21, 0.4); }
+        .nav-divider { width: 1px; height: 24px; background: rgba(255, 255, 255, 0.2); }
+        .logout-btn { color: #ef4444; font-weight: 600; font-size: 1.05rem; display: flex; align-items: center; gap: 8px; transition: all 0.3s ease; text-decoration: none; text-shadow: 0 2px 8px rgba(0,0,0,0.4); }
+        .logout-btn:hover { color: #f87171; transform: translateY(-2px); }
+        .profile-btn { width: 44px; height: 44px; border-radius: 50%; background: rgba(255,255,255,0.1); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; color: white; border: 1px solid rgba(255, 255, 255, 0.2); cursor: pointer; transition: all 0.3s ease; }
+        .profile-btn:hover { background: #eab308; border-color: #eab308; color: #000; transform: scale(1.08); box-shadow: 0 4px 15px rgba(234, 179, 8, 0.4); }
+
+        .hero-wrapper { position: relative; width: 100%; min-height: 85vh; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+        .hero-video-container { position: absolute; inset: 0; z-index: 0; overflow: hidden; background: #000; }
+        .hero-video { position: absolute; top: 50%; left: 50%; min-width: 100%; min-height: 100%; width: auto; height: auto; transform: translate(-50%, -50%); object-fit: cover; pointer-events: none; z-index: 1; }
+        
+        /* Overlays */
+        .hero-overlay-dark { position: absolute; inset: 0; background: linear-gradient(to bottom, rgba(5,5,5,0.4) 0%, rgba(5,5,5,0.7) 60%, #050505 100%); z-index: 2; pointer-events: none; }
+        .hero-overlay-gold { position: absolute; inset: 0; background: radial-gradient(circle at center, rgba(234, 179, 8, 0.08) 0%, transparent 60%); z-index: 3; pointer-events: none; mix-blend-mode: screen; }
+        .hero-ambient-glow { position: absolute; top: -100px; right: -100px; width: 600px; height: 600px; background: rgba(234, 179, 8, 0.1); filter: blur(150px); z-index: 3; pointer-events: none; border-radius: 50%; }
+
+        .hero-content { position: relative; z-index: 10; width: 100%; text-align: center; margin-top: 80px; animation: fadeInUp 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        
+        .search-glass {
+            background: rgba(10, 10, 10, 0.4); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px);
+            border: 1px solid rgba(234, 179, 8, 0.2); border-radius: 100px; padding: 12px 20px;
+            display: flex; align-items: center; gap: 15px; max-width: 850px; margin: 45px auto;
+            box-shadow: 0 25px 60px rgba(0,0,0,0.6), inset 0 0 20px rgba(234, 179, 8, 0.05);
+            position: relative;
+            transform: translateY(0);
+            transition: all 0.4s ease;
+        }
+        .search-glass:hover { transform: translateY(-3px); box-shadow: 0 30px 70px rgba(0,0,0,0.7), inset 0 0 25px rgba(234, 179, 8, 0.1); border-color: rgba(234, 179, 8, 0.4); }
+        .search-glass input, .search-glass select {
+            background: transparent; border: none; color: white; font-size: 1.15rem; outline: none; padding: 15px 10px; width: 100%; font-weight: 500;
+        }
+        .search-glass input::placeholder { color: rgba(255,255,255,0.6); }
+        .search-glass select option { background: #111; color: white; }
+        .search-divider { width: 1px; height: 35px; background: linear-gradient(to bottom, transparent, rgba(234, 179, 8, 0.3), transparent); }
+        .search-btn {
+            background: linear-gradient(135deg, #facc15 0%, #ca8a04 100%); color: #000; border: none;
+            padding: 16px 35px; border-radius: 100px; font-weight: 800; font-size: 1.15rem; cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); box-shadow: 0 10px 25px rgba(234, 179, 8, 0.4);
+            white-space: nowrap;
+        }
+        .search-btn:hover { transform: translateY(-3px) scale(1.05); box-shadow: 0 15px 35px rgba(234, 179, 8, 0.6); }
+
+        .dining-card {
+            background: rgba(255, 255, 255, 0.03); backdrop-filter: blur(15px); -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 24px; overflow: hidden;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); position: relative;
+            display: flex; flex-direction: column;
+        }
+        .dining-card:hover {
+            transform: translateY(-10px); border-color: rgba(234, 179, 8, 0.3);
+            box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.8), 0 0 20px rgba(234, 179, 8, 0.1);
+        }
+        .d-image-wrapper { position: relative; height: 220px; overflow: hidden; }
+        .d-image { width: 100%; height: 100%; object-fit: cover; transition: transform 0.6s ease; }
+        .dining-card:hover .d-image { transform: scale(1.1); }
+        .d-rating { position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.7); backdrop-filter: blur(8px); padding: 6px 12px; border-radius: 100px; font-size: 0.85rem; font-weight: bold; color: #fff; display: flex; align-items: center; gap: 5px; border: 1px solid rgba(255,255,255,0.1); }
+        .d-rating i { color: #eab308; }
+        .d-offer-badge { position: absolute; bottom: 15px; left: 15px; background: linear-gradient(135deg, #ef4444 0%, #b91c1c 100%); color: white; padding: 6px 12px; border-radius: 8px; font-size: 0.8rem; font-weight: bold; box-shadow: 0 4px 10px rgba(239, 68, 68, 0.4); display: flex; align-items: center; gap: 6px; }
+        .d-content { padding: 20px; flex-grow: 1; display: flex; flex-direction: column; justify-content: space-between; }
+        .d-cuisine { font-size: 0.85rem; color: #9ca3af; margin-bottom: 5px; }
+        .d-title { font-size: 1.4rem; font-weight: bold; color: #fff; margin-bottom: 10px; }
+        .d-info { display: flex; justify-content: space-between; align-items: center; font-size: 0.9rem; color: #d1d5db; margin-bottom: 20px; }
+        .d-btn { background: rgba(255,255,255,0.1); color: #eab308; text-align: center; padding: 12px; border-radius: 12px; font-weight: bold; transition: all 0.3s ease; text-decoration: none; border: 1px solid rgba(234, 179, 8, 0.2); }
+        .d-btn:hover { background: #eab308; color: #000; box-shadow: 0 4px 15px rgba(234, 179, 8, 0.4); }
+
+        /* Scrollable categories */
+        .category-scroll { display: flex; gap: 20px; overflow-x: auto; padding-bottom: 20px; margin-top: 40px; scrollbar-width: none; }
+        .category-scroll::-webkit-scrollbar { display: none; }
+        .cat-card { min-width: 250px; height: 150px; border-radius: 20px; overflow: hidden; position: relative; cursor: pointer; transition: transform 0.3s; }
+        .cat-card:hover { transform: scale(1.05); }
+        .cat-card img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.7); transition: filter 0.3s; }
+        .cat-card:hover img { filter: brightness(0.9); }
+        .cat-card span { position: absolute; bottom: 20px; left: 20px; color: white; font-weight: bold; font-size: 1.2rem; z-index: 2; text-shadow: 0 2px 5px rgba(0,0,0,0.8); }
+
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }
+    </style>
+</head>
+<body>
+
+    <header class="transparent-navbar" id="mainNav">
+        <div class="navbar-content">
+            <div class="logo-section">
+                <div class="logo">
+                    <div class="logo-icon"><i class="fas fa-wine-glass-alt"></i></div>
+                    <span>Meal Buddy Dining</span>
+                </div>
+                <div class="tagline">Reserve the perfect table.</div>
+            </div>
+            
+            <div class="nav-links">
+                <a href="{% url 'dashboard' username %}" class="nav-link-item"><i class="fas fa-motorcycle"></i> Delivery</a>
+                <a href="{% url 'my_reservations' username %}" class="nav-link-item"><i class="fas fa-calendar-check"></i> Bookings</a>
+                <a href="{% url 'offers' username %}" class="nav-link-item"><i class="fas fa-percent"></i> Offers</a>
+                <div class="nav-divider"></div>
+                <a href="{% url 'logout' %}" class="logout-btn"><i class="fas fa-sign-out-alt"></i> Logout</a>
+                <div class="profile-btn" title="{{username}}"><i class="fas fa-user text-sm"></i></div>
+            </div>
+        </div>
+    </header>
+
+    <div class="hero-wrapper">
+        <div class="hero-video-container">
+            <video autoplay muted loop playsinline preload="auto" class="hero-video">
+                <source src="{% static 'delivery/images/dining-vid.mp4' %}" type="video/mp4">
+            </video>
+            <div class="hero-overlay-dark"></div>
+            <div class="hero-overlay-gold"></div>
+            <div class="hero-ambient-glow"></div>
+        </div>
+        
+        <div class="hero-content max-w-5xl mx-auto px-6">
+            <h1 class="text-5xl md:text-7xl font-extrabold mb-6 drop-shadow-2xl text-transparent bg-clip-text bg-gradient-to-r from-yellow-200 via-yellow-400 to-yellow-600" style="filter: drop-shadow(0 10px 20px rgba(234,179,8,0.2));">
+                Experience Luxury Dining
+            </h1>
+            <p class="text-xl md:text-2xl text-gray-200 font-light drop-shadow-md tracking-wide">Reserve your table at the finest restaurants, instantly.</p>
+
+            <form action="{% url 'dining_home' username %}" method="GET" class="search-glass">
+                <i class="fas fa-search text-yellow-500 pl-4 text-xl"></i>
+                <input type="text" name="q" value="{{ query }}" placeholder="Restaurant, cuisine, or location...">
+                <div class="search-divider"></div>
+                <i class="fas fa-calendar-alt text-yellow-500 text-xl"></i>
+                <input type="date" value="2026-05-10" style="width: 170px; color-scheme: dark;">
+                <div class="search-divider"></div>
+                <i class="fas fa-user-friends text-yellow-500 text-xl"></i>
+                <select style="width: 130px; cursor: pointer;">
+                    <option value="2">2 Guests</option>
+                    <option value="3">3 Guests</option>
+                    <option value="4">4 Guests</option>
+                    <option value="5">5+ Guests</option>
+                </select>
+                <button type="submit" class="search-btn">Reserve Now</button>
+            </form>
+        </div>
+    </div>
+
+    <main class="max-w-7xl mx-auto px-6 py-16 relative z-10">
+        
+        <div class="mb-16">
+            <h2 class="text-3xl font-bold mb-6">Curated Experiences</h2>
+            <div class="category-scroll">
+                {% for cat in categories %}
+                <a href="?category={{ cat.slug }}" class="cat-card block">
+                    <img src="{{ cat.cover_image }}" alt="{{ cat.name }}">
+                    <span>{{ cat.name }}</span>
+                </a>
+                {% empty %}
+                <p class="text-gray-400">No categories found.</p>
+                {% endfor %}
+            </div>
+            {% if cat_slug %}
+            <div class="mt-4">
+                <a href="{% url 'dining_home' username %}" class="text-yellow-500 hover:text-yellow-400 text-sm font-semibold"><i class="fas fa-times"></i> Clear Filter</a>
+            </div>
+            {% endif %}
+        </div>
+
+        {% for collection in collections %}
+        <div class="mb-16">
+            <div class="flex items-center justify-between mb-8">
+                <div>
+                    <h2 class="text-3xl font-extrabold text-white">{{ collection.title }}</h2>
+                    {% if collection.subtitle %}<p class="text-gray-400 mt-2">{{ collection.subtitle }}</p>{% endif %}
+                </div>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                {% for r in collection.restaurants.all %}
+                <div class="dining-card group">
+                    <div class="d-image-wrapper">
+                        <img src="{{ r.image }}" alt="{{ r.name }}" class="d-image">
+                        <div class="d-rating"><i class="fas fa-star"></i> {{ r.rating }}</div>
+                        {% if r.dining_offer %}
+                        <div class="d-offer-badge"><i class="fas fa-tags"></i> {{ r.dining_offer }}</div>
+                        {% endif %}
+                    </div>
+                    <div class="d-content">
+                        <div>
+                            <div class="d-cuisine">{{ r.cuisine }} {% if r.ambience_tags %}• {{ r.ambience_tags }}{% endif %}</div>
+                            <h3 class="d-title group-hover:text-yellow-500 transition-colors">{{ r.name }}</h3>
+                            <div class="d-info">
+                                <span><i class="fas fa-map-marker-alt text-gray-500"></i> {{ r.address|default:"City Center" }}</span>
+                                <span>₹{{ r.price_for_two }} for two</span>
+                            </div>
+                        </div>
+                        <a href="{% url 'dining_restaurant' r.id username %}" class="d-btn mt-4">
+                            Book a Table
+                        </a>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-gray-500">No restaurants in this collection yet.</p>
+                {% endfor %}
+            </div>
+        </div>
+        {% endfor %}
+
+        <div class="flex items-center justify-between mb-10">
+            <h2 class="text-3xl md:text-4xl font-extrabold text-white">All <span class="text-yellow-500">Restaurants</span></h2>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+            {% for r in restaurants %}
+            <div class="dining-card group">
+                <div class="d-image-wrapper">
+                    <img src="{{ r.image }}" alt="{{ r.name }}" class="d-image">
+                    <div class="d-rating"><i class="fas fa-star"></i> {{ r.rating }}</div>
+                    {% if r.dining_offer %}
+                    <div class="d-offer-badge"><i class="fas fa-tags"></i> {{ r.dining_offer }}</div>
+                    {% endif %}
+                </div>
+                <div class="d-content">
+                    <div>
+                        <div class="d-cuisine">{{ r.cuisine }} {% if r.ambience_tags %}• {{ r.ambience_tags }}{% endif %}</div>
+                        <h3 class="d-title group-hover:text-yellow-500 transition-colors">{{ r.name }}</h3>
+                        <div class="d-info">
+                            <span><i class="fas fa-map-marker-alt text-gray-500"></i> {{ r.address|default:"City Center" }}</span>
+                            <span>₹{{ r.price_for_two }} for two</span>
+                        </div>
+                    </div>
+                    <a href="{% url 'dining_restaurant' r.id username %}" class="d-btn mt-4">
+                        Book a Table
+                    </a>
+                </div>
+            </div>
+            {% empty %}
+            <div class="col-span-full py-20 text-center">
+                <i class="fas fa-chair text-gray-600 text-6xl mb-4"></i>
+                <h2 class="text-2xl font-bold text-gray-400">No dining places available.</h2>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+
+    <footer class="py-12 border-t border-white/5 bg-black/50 text-center text-gray-600 text-sm mt-10">
+        <p>&copy; 2026 Meal Buddy Dining. All rights reserved.</p>
+    </footer>
+
+    <script>
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('mainNav');
+            if (window.scrollY > 50) {
+                nav.style.background = 'rgba(5, 5, 5, 0.85)';
+                nav.style.backdropFilter = 'blur(25px)';
+                nav.style.webkitBackdropFilter = 'blur(25px)';
+                nav.style.paddingTop = '20px';
+                nav.style.paddingBottom = '20px';
+                nav.style.boxShadow = '0 15px 40px rgba(0,0,0,0.8), 0 1px 0 rgba(255,255,255,0.05)';
+            } else {
+                nav.style.background = 'linear-gradient(to bottom, rgba(0,0,0,0.85) 0%, rgba(0,0,0,0.3) 60%, rgba(0,0,0,0) 100%)';
+                nav.style.backdropFilter = 'none';
+                nav.style.webkitBackdropFilter = 'none';
+                nav.style.paddingTop = '35px';
+                nav.style.paddingBottom = '55px';
+                nav.style.boxShadow = 'none';
+            }
+        });
+    </script>
+</body>
+</html>

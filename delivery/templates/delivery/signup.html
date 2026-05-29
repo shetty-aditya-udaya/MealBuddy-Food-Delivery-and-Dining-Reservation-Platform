@@ -1,0 +1,115 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meal Buddy | Create Your Account</title>
+    <link rel="stylesheet" href="{% static 'delivery/css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body>
+    <div class="hero-container auth-container">
+        <!-- Floating Food Background -->
+        <img src="{% static 'delivery/images/biryani.png' %}" class="auth-bg-food" style="top: 10%; left: 5%; transform: rotate(-15deg);">
+        <img src="{% static 'delivery/images/burger.png' %}" class="auth-bg-food" style="top: 15%; right: 5%; transform: rotate(10deg);">
+        <img src="{% static 'delivery/images/pasta.png' %}" class="auth-bg-food" style="bottom: 10%; left: 8%; transform: rotate(20deg);">
+        <img src="{% static 'delivery/images/butter_chicken.png' %}" class="auth-bg-food" style="bottom: 15%; right: 10%; transform: rotate(-5deg);">
+        <img src="{% static 'delivery/images/shawarma.png' %}" class="auth-bg-food" style="top: 50%; left: -5%; transform: rotate(45deg);">
+
+        <!-- Signup Card -->
+        <div class="signup-card">
+            <!-- Logo Reuse -->
+            <div class="logo-section mb-8 flex flex-col items-center">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-utensils text-black text-sm"></i>
+                    </div>
+                    <span>Meal Buddy</span>
+                </div>
+            </div>
+
+            <div class="text-center mb-8">
+                <h2 class="text-3xl font-bold mb-2">Create Your Account</h2>
+                <p class="text-gray-400 text-sm">Sign up and start ordering your favorite meals instantly.</p>
+            </div>
+
+            <form action="{% url 'signup' %}" method="post" id="signupForm">
+                {% csrf_token %}
+                
+                <div class="form-group">
+                    <i class="fas fa-user"></i>
+                    <input type="text" name="username" class="auth-input" placeholder="Username" required>
+                </div>
+
+                <div class="form-group">
+                    <i class="fas fa-envelope"></i>
+                    <input type="email" name="email" class="auth-input" placeholder="Email Address" required>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="form-group">
+                        <i class="fas fa-lock"></i>
+                        <input type="password" name="password" id="password" class="auth-input" placeholder="Password" required>
+                    </div>
+                    <div class="form-group">
+                        <i class="fas fa-shield-halved"></i>
+                        <input type="password" name="confirm_password" id="confirm_password" class="auth-input" placeholder="Confirm" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <i class="fas fa-phone"></i>
+                    <input type="text" name="mobile" class="auth-input" placeholder="Mobile Number" required>
+                </div>
+
+                <div class="form-group">
+                    <i class="fas fa-location-dot"></i>
+                    <textarea name="address" class="auth-input auth-textarea" placeholder="Your Delivery Address" required></textarea>
+                </div>
+
+                <div id="errorBox" class="text-red-400 text-sm mb-6 text-center {% if not error %}hidden{% endif %} bg-red-900/20 py-2 rounded-lg border border-red-900/50 animate-pulse">
+                    {{ error }}
+                </div>
+
+                <button type="submit" class="cta-btn btn-full flex items-center justify-center" id="submitBtn">
+                    <div class="loading-spinner" id="spinner"></div>
+                    <span>Start Ordering</span>
+                </button>
+
+                <div class="text-center mt-6">
+                    <p class="text-gray-400 text-sm">
+                        Already have an account? 
+                        <a href="{% url 'open_signin' %}" class="text-emerald-500 font-semibold hover:underline">Sign In</a>
+                    </p>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        const form = document.getElementById('signupForm');
+        const submitBtn = document.getElementById('submitBtn');
+        const spinner = document.getElementById('spinner');
+        const errorBox = document.getElementById('errorBox');
+
+        form.addEventListener('submit', function(e) {
+            const pass = document.getElementById('password').value;
+            const confirm = document.getElementById('confirm_password').value;
+
+            if (pass !== confirm) {
+                e.preventDefault();
+                errorBox.innerText = "Passwords do not match!";
+                errorBox.classList.remove('hidden');
+                return;
+            }
+
+            // Show loading state
+            submitBtn.disabled = true;
+            spinner.style.display = 'block';
+            submitBtn.style.opacity = '0.7';
+        });
+    </script>
+</body>
+</html>

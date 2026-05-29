@@ -1,0 +1,313 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reservation Review | {{ restaurant.name }}</title>
+    <link rel="stylesheet" href="{% static 'delivery/css/style.css' %}">
+    
+    <!-- Fonts: Playfair Display (Serif) & Inter (Sans-Serif) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=Playfair+Display:ital,wght@0,400;0,600;0,700;1,400&display=swap" rel="stylesheet">
+    
+    <!-- Thin Stroke Icons -->
+    <script src="https://unpkg.com/@phosphor-icons/web"></script>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        obsidian: '#0D0D0D',
+                        champagne: '#D4AF37',
+                        ivory: '#FDFBF7'
+                    },
+                    fontFamily: {
+                        sans: ['Inter', 'sans-serif'],
+                        serif: ['Playfair Display', 'serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { 
+            background-color: #0D0D0D; 
+            color: #FDFBF7; 
+            /* Subtle out-of-focus background image with dark overlay */
+            background-image: linear-gradient(rgba(13, 13, 13, 0.90), rgba(13, 13, 13, 0.98)), url('https://images.unsplash.com/photo-1514362545857-3bc16c4c7d1b?q=80&w=2000');
+            background-size: cover;
+            background-attachment: fixed;
+            background-position: center;
+        }
+        
+        .glass-container {
+            background: rgba(255, 255, 255, 0.015);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border: 1px solid rgba(212, 175, 55, 0.15);
+            border-radius: 12px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.6);
+            transition: all 0.4s ease;
+        }
+
+        .gold-text {
+            color: #D4AF37;
+        }
+
+        .cta-btn {
+            background: #D4AF37;
+            color: #0D0D0D;
+            padding: 16px;
+            border-radius: 4px;
+            font-family: 'Inter', sans-serif;
+            font-weight: 600;
+            letter-spacing: 1.5px;
+            text-transform: uppercase;
+            font-size: 0.9rem;
+            text-align: center;
+            display: inline-block;
+            transition: all 0.5s ease;
+            width: 100%;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .cta-btn:hover {
+            background: #e6c55c;
+            box-shadow: 0 0 30px rgba(212, 175, 55, 0.3);
+            transform: translateY(-2px);
+        }
+
+        .info-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px 0;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+        }
+        .info-row:last-child { border-bottom: none; }
+
+        @keyframes fade-in-up {
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
+        }
+        .animate-fade-in { animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; }
+        .delay-100 { animation-delay: 0.1s; }
+        .delay-200 { animation-delay: 0.2s; }
+        .delay-300 { animation-delay: 0.3s; }
+    </style>
+</head>
+<body class="relative overflow-x-hidden min-h-screen flex flex-col font-sans">
+
+    <!-- Header -->
+    <header class="relative z-50 px-10 py-8 flex justify-between items-center border-b border-champagne/10 bg-obsidian/60 backdrop-blur-md sticky top-0">
+        <a href="{% url 'dining_restaurant' restaurant.id username %}" class="text-gray-400 hover:text-ivory transition-colors flex items-center gap-3 font-light text-sm tracking-widest uppercase">
+            <i class="ph-light ph-arrow-left text-xl"></i> Return
+        </a>
+        <div class="font-serif text-2xl tracking-widest text-ivory">MEAL BUDDY <span class="text-champagne italic">Luxe</span></div>
+        <div class="w-24"></div>
+    </header>
+
+    <main class="w-full max-w-[1400px] mx-auto px-8 py-20 lg:py-24 relative z-10 flex-grow">
+        
+        <!-- Minimalist Centered Header -->
+        <div class="text-center mb-20 animate-fade-in">
+            <h1 class="text-5xl md:text-6xl font-serif mb-6 tracking-wide text-ivory">Reservation <span class="italic text-champagne">Review</span></h1>
+            <p class="text-gray-400 text-sm tracking-widest uppercase font-light">Confirm your executive dining experience</p>
+        </div>
+
+        <div class="flex flex-col lg:flex-row gap-16 items-start">
+            
+            <!-- LEFT MAIN CONTENT (70%) -->
+            <div class="w-full lg:w-[68%] flex flex-col space-y-12">
+                
+                <!-- Restaurant Hero Section (Horizontal) -->
+                <div class="glass-container overflow-hidden animate-fade-in delay-100 p-1 flex flex-col md:flex-row">
+                    <!-- Image -->
+                    <div class="w-full md:w-5/12 h-72 md:h-auto relative overflow-hidden rounded-l-lg rounded-r-lg md:rounded-r-none">
+                        <img src="{{ restaurant.image }}" alt="{{ restaurant.name }}" class="w-full h-full object-cover">
+                        <div class="absolute inset-0 bg-obsidian/20"></div>
+                        
+                        <div class="absolute top-6 left-6">
+                            <span class="bg-obsidian/80 backdrop-blur-md text-champagne px-4 py-2 rounded-sm text-xs font-light tracking-widest uppercase border border-champagne/20 flex items-center gap-2">
+                                <i class="ph-light ph-star text-lg"></i> {{ restaurant.rating }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <!-- Content -->
+                    <div class="w-full md:w-7/12 p-10 flex flex-col justify-center">
+                        <div class="flex items-center gap-3 mb-4 text-xs tracking-widest uppercase text-champagne font-light">
+                            <span><i class="ph-light ph-fork-knife mr-1 text-lg align-middle"></i> {{ restaurant.cuisine }}</span>
+                            <span class="text-gray-600">|</span>
+                            <span class="text-gray-400"><i class="ph-light ph-wallet mr-1 text-lg align-middle"></i> ₹{{ restaurant.price_for_two }} for two</span>
+                        </div>
+                        
+                        <h2 class="text-4xl font-serif text-ivory mb-4 tracking-wide">{{ restaurant.name }}</h2>
+                        
+                        <p class="text-gray-400 flex items-start gap-2 text-sm font-light mb-8">
+                            <i class="ph-light ph-map-pin text-champagne text-lg"></i> 
+                            <span class="leading-relaxed">{{ restaurant.address }}, {{ restaurant.city }}</span>
+                        </p>
+                        
+                        <div class="flex flex-wrap gap-3">
+                            {% for cat in restaurant.categories.all|slice:":3" %}
+                            <span class="text-gray-300 px-0 py-1 text-xs font-light tracking-widest uppercase border-b border-champagne/30">
+                                {{ cat.name }}
+                            </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Structured Grid (Booking Details) -->
+                <div class="animate-fade-in delay-200">
+                    <h3 class="font-serif text-2xl text-ivory mb-8 pb-4 border-b border-champagne/20 flex items-center gap-3">
+                        <i class="ph-light ph-calendar-check text-champagne"></i> Itinerary
+                    </h3>
+                    
+                    <div class="grid grid-cols-2 md:grid-cols-3 gap-6">
+                        <!-- Date -->
+                        <div class="glass-container p-6 flex flex-col">
+                            <i class="ph-light ph-calendar-blank text-champagne text-3xl mb-4"></i>
+                            <span class="text-[10px] text-gray-500 uppercase tracking-widest mb-2 font-medium">Date</span>
+                            <span class="text-ivory font-serif text-xl">{{ pending.date }}</span>
+                        </div>
+
+                        <!-- Time -->
+                        <div class="glass-container p-6 flex flex-col">
+                            <i class="ph-light ph-clock text-champagne text-3xl mb-4"></i>
+                            <span class="text-[10px] text-gray-500 uppercase tracking-widest mb-2 font-medium">Time</span>
+                            <span class="text-ivory font-serif text-xl">{{ pending.time }}</span>
+                        </div>
+
+                        <!-- Guests -->
+                        <div class="glass-container p-6 flex flex-col">
+                            <i class="ph-light ph-users text-champagne text-3xl mb-4"></i>
+                            <span class="text-[10px] text-gray-500 uppercase tracking-widest mb-2 font-medium">Party Size</span>
+                            <span class="text-ivory font-serif text-xl">{{ pending.guests }} Guests</span>
+                        </div>
+
+                        <!-- Occasion -->
+                        <div class="glass-container p-6 flex flex-col">
+                            <i class="ph-light ph-martini text-champagne text-3xl mb-4"></i>
+                            <span class="text-[10px] text-gray-500 uppercase tracking-widest mb-2 font-medium">Occasion</span>
+                            <span class="text-ivory font-serif text-xl">{{ pending.occasion|default:"Dining" }}</span>
+                        </div>
+
+                        <!-- Seating -->
+                        <div class="glass-container p-6 flex flex-col">
+                            <i class="ph-light ph-armchair text-champagne text-3xl mb-4"></i>
+                            <span class="text-[10px] text-gray-500 uppercase tracking-widest mb-2 font-medium">Seating Preference</span>
+                            <span class="text-ivory font-serif text-xl">Standard</span>
+                        </div>
+
+                        <!-- Status -->
+                        <div class="glass-container p-6 flex flex-col">
+                            <i class="ph-light ph-seal-check text-champagne text-3xl mb-4"></i>
+                            <span class="text-[10px] text-gray-500 uppercase tracking-widest mb-2 font-medium">Status</span>
+                            <span class="text-ivory font-serif text-xl">Pending</span>
+                        </div>
+                    </div>
+
+                    {% if pending.special_request %}
+                    <div class="mt-6 glass-container p-8 flex gap-6 items-start border-l-2 border-l-champagne">
+                        <i class="ph-light ph-quotes text-champagne/40 text-4xl"></i>
+                        <div>
+                            <p class="text-[10px] text-champagne uppercase tracking-widest font-medium mb-3">Special Request</p>
+                            <p class="text-ivory font-serif italic text-xl leading-relaxed">"{{ pending.special_request }}"</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Extra Information -->
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-8 animate-fade-in delay-300">
+                    <!-- Policy -->
+                    <div class="glass-container p-8">
+                        <h4 class="text-xs uppercase tracking-widest text-champagne mb-5 font-medium flex items-center gap-2">
+                            <i class="ph-light ph-shield-warning text-lg"></i> Cancellation Policy
+                        </h4>
+                        <p class="text-gray-400 text-sm font-light leading-relaxed mb-4">
+                            Cancellations are accommodated without charge up to <span class="text-ivory font-medium">2 hours</span> prior to seating.
+                        </p>
+                        <p class="text-gray-500 text-xs font-light leading-relaxed italic border-l border-gray-700 pl-4">
+                            The reservation fee secures your table and is non-refundable for no-shows.
+                        </p>
+                    </div>
+
+                    <!-- Dining Notes -->
+                    <div class="glass-container p-8">
+                        <h4 class="text-xs uppercase tracking-widest text-champagne mb-5 font-medium flex items-center gap-2">
+                            <i class="ph-light ph-info text-lg"></i> Executive Notes
+                        </h4>
+                        <ul class="text-gray-400 text-sm font-light leading-relaxed space-y-4">
+                            <li class="flex items-start gap-3"><i class="ph-light ph-check text-champagne text-lg mt-0.5"></i> Table held for 15 minutes.</li>
+                            <li class="flex items-start gap-3"><i class="ph-light ph-check text-champagne text-lg mt-0.5"></i> Smart elegant dress code required.</li>
+                            <li class="flex items-start gap-3"><i class="ph-light ph-check text-champagne text-lg mt-0.5"></i> Valet service available.</li>
+                        </ul>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- RIGHT SIDEBAR (30%) -->
+            <div class="w-full lg:w-[32%] lg:max-w-[420px] animate-fade-in delay-200">
+                <div class="glass-container sticky top-32 p-10">
+                    <h3 class="font-serif text-2xl text-ivory mb-8 pb-4 border-b border-champagne/20 flex items-center gap-3">
+                        <i class="ph-light ph-receipt text-champagne"></i> Summary
+                    </h3>
+                    
+                    <div class="space-y-2 mb-10">
+                        <div class="info-row">
+                            <span class="text-gray-400 font-light text-sm">Reservation Fee</span>
+                            <span class="font-serif text-ivory text-lg">₹{{ fee|floatformat:2 }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="text-gray-400 font-light text-sm">Platform Fee</span>
+                            <span class="font-serif text-ivory text-lg">₹{{ platform_fee|floatformat:2 }}</span>
+                        </div>
+                        <div class="info-row">
+                            <span class="text-gray-400 font-light text-sm flex items-center gap-2">Taxes (18% GST)</span>
+                            <span class="font-serif text-ivory text-lg">₹{{ tax|floatformat:2 }}</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-10 text-center">
+                        <span class="text-[10px] text-champagne uppercase tracking-widest font-medium mb-3 block">Total Payable</span>
+                        <span class="font-serif text-5xl text-ivory tracking-wide block mb-2" style="text-shadow: 0 0 20px rgba(212,175,55,0.2);">₹{{ total|floatformat:2 }}</span>
+                        <p class="text-[10px] text-gray-500 uppercase tracking-widest font-light">Includes all applicable taxes</p>
+                    </div>
+
+                    <a href="{% url 'checkout' username %}?mode=dining" class="cta-btn group">
+                        <span class="relative z-10 flex items-center justify-center gap-3">
+                            Confirm Reservation <i class="ph-light ph-arrow-right text-xl group-hover:translate-x-1 transition-transform"></i>
+                        </span>
+                    </a>
+
+                    <div class="mt-8 flex flex-col items-center justify-center gap-6">
+                        <div class="text-[10px] text-gray-400 uppercase tracking-widest font-light flex items-center justify-center gap-2">
+                            <i class="ph-light ph-lock-key text-champagne text-lg"></i> Secure Checkout
+                        </div>
+                        <div class="flex gap-6 text-gray-500">
+                            <i class="ph-light ph-credit-card text-2xl hover:text-ivory transition-colors"></i>
+                            <i class="ph-light ph-bank text-2xl hover:text-ivory transition-colors"></i>
+                            <i class="ph-light ph-shield-check text-2xl hover:text-ivory transition-colors"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </main>
+
+    <footer class="py-12 text-center text-gray-600 font-light text-xs tracking-widest uppercase border-t border-champagne/10 mt-10">
+        <p>&copy; 2026 Meal Buddy Luxe. Reserved.</p>
+    </footer>
+
+</body>
+</html>

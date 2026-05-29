@@ -1,0 +1,618 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meal Buddy | Explore Restaurants</title>
+    <link rel="stylesheet" href="{% static 'delivery/css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #050505;
+            color: #ffffff;
+        }
+
+        /* --- Transparent Immersive Navbar --- */
+        .transparent-navbar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 100;
+            /* Top gradient to ensure readability of nav text over video */
+            background: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0) 100%);
+            padding: 30px 0 50px 0;
+            transition: all 0.4s ease;
+        }
+
+        .navbar-content {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            width: 100%;
+            padding: 0 60px;
+        }
+
+        .logo-section {
+            display: flex;
+            flex-direction: column;
+            align-items: flex-start;
+            gap: 6px;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-size: 1.8rem;
+            font-weight: 800;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            color: white;
+            letter-spacing: -0.5px;
+            text-shadow: 0 2px 10px rgba(0,0,0,0.5);
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: #10b981;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #000;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+            font-size: 1rem;
+        }
+
+        .tagline {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.8);
+            font-weight: 500;
+            letter-spacing: 0.5px;
+            text-shadow: 0 1px 5px rgba(0,0,0,0.5);
+        }
+
+        .nav-links {
+            display: flex;
+            align-items: center;
+            gap: 32px;
+            margin-top: 4px; /* Visual alignment with logo */
+        }
+
+        .nav-link-item {
+            color: rgba(255, 255, 255, 0.9);
+            text-decoration: none;
+            font-weight: 600;
+            font-size: 1.05rem;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        }
+
+        .nav-link-item:hover {
+            color: #10b981;
+            transform: translateY(-2px);
+            text-shadow: 0 4px 12px rgba(16, 185, 129, 0.3);
+        }
+
+        .nav-divider {
+            width: 1px;
+            height: 24px;
+            background: rgba(255, 255, 255, 0.2);
+        }
+
+        .logout-btn {
+            color: #ef4444;
+            font-weight: 600;
+            font-size: 1.05rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            text-shadow: 0 2px 8px rgba(0,0,0,0.4);
+        }
+
+        .logout-btn:hover {
+            color: #f87171;
+            transform: translateY(-2px);
+        }
+
+        .profile-btn {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.1);
+            backdrop-filter: blur(8px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .profile-btn:hover {
+            background: #10b981;
+            border-color: #10b981;
+            color: #000;
+            transform: scale(1.08);
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+        }
+
+        /* --- Hero Section Structure --- */
+        .hero-wrapper {
+            position: relative;
+            width: 100%;
+            min-height: 85vh; /* Hero takes up 85% of viewport */
+            display: flex;
+            align-items: center;
+            justify-content: flex-start;
+            overflow: hidden; /* Prevents video from overflowing out of hero */
+        }
+
+        .hero-video-container {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            overflow: hidden;
+            background: #000;
+        }
+
+        /* Ensures video acts as an immersive cover *inside* the container */
+        .hero-video {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            transform: translate(-50%, -50%);
+            object-fit: cover;
+            pointer-events: none; /* No clickable video */
+            z-index: 1;
+        }
+
+        .hero-overlay-dark {
+            position: absolute;
+            inset: 0;
+            /* Gradient fades to solid background color at the bottom to blend with content below */
+            background: linear-gradient(
+                to bottom,
+                rgba(5, 5, 5, 0.5) 0%,
+                rgba(5, 5, 5, 0.8) 70%,
+                #050505 100%
+            );
+            z-index: 2;
+            pointer-events: none;
+        }
+
+        .hero-overlay-glow {
+            position: absolute;
+            inset: 0;
+            background: radial-gradient(circle at center, transparent 0%, rgba(5,5,5,0.3) 100%);
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 10;
+            width: 100%;
+            padding-top: 220px; /* Lowered hero text to avoid clash with navbar */
+            animation: fadeInUp 1s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* --- Search & Pills --- */
+        .search-container {
+            max-width: 650px;
+            margin: 30px 0;
+            position: relative;
+        }
+
+        .search-container input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            border-radius: 100px;
+            padding: 20px 24px 20px 60px;
+            color: white;
+            font-size: 1.1rem;
+            transition: all 0.4s ease;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.5);
+        }
+
+        .search-container input:focus {
+            outline: none;
+            border-color: #10b981;
+            background: rgba(16, 185, 129, 0.05);
+            box-shadow: 0 0 25px rgba(16, 185, 129, 0.2);
+        }
+
+        .search-container i {
+            position: absolute;
+            left: 24px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: rgba(255, 255, 255, 0.4);
+            font-size: 1.2rem;
+            transition: color 0.3s;
+        }
+
+        .search-container input:focus + i, 
+        .search-container:focus-within i {
+            color: #10b981;
+        }
+
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+
+        .category-pill {
+            flex-shrink: 0;
+            padding: 12px 24px;
+            border-radius: 100px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: #d1d5db;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(10px);
+        }
+
+        .category-pill:hover, .category-pill.active {
+            background: rgba(16, 185, 129, 0.15);
+            border-color: rgba(16, 185, 129, 0.4);
+            color: #34d399;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(0,0,0,0.2), 0 0 15px rgba(16,185,129,0.2);
+        }
+
+        /* --- Restaurant Cards --- */
+        .restaurant-card {
+            background: rgba(255, 255, 255, 0.02);
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            border-radius: 28px;
+            overflow: hidden;
+            transition: all 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+        }
+
+        .restaurant-card:hover {
+            transform: translateY(-12px) scale(1.02);
+            border-color: rgba(16, 185, 129, 0.4);
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.8), 0 0 20px rgba(16, 185, 129, 0.15);
+        }
+
+        .res-image-wrapper {
+            position: relative;
+            aspect-ratio: 16/9;
+            width: 100%;
+            overflow: hidden;
+        }
+
+        .res-image {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            transition: transform 0.6s ease;
+        }
+
+        .restaurant-card:hover .res-image {
+            transform: scale(1.1);
+        }
+
+        .rating-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(8px);
+            padding: 6px 12px;
+            border-radius: 100px;
+            font-size: 0.85rem;
+            font-weight: 700;
+            color: #fbbf24;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            border: 1px solid rgba(251, 191, 36, 0.2);
+        }
+
+        .res-content {
+            padding: 24px;
+        }
+
+        .cuisine-tag {
+            background: rgba(16, 185, 129, 0.1);
+            color: #34d399;
+            padding: 4px 12px;
+            border-radius: 100px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            display: inline-block;
+            margin-bottom: 12px;
+            border: 1px solid rgba(16, 185, 129, 0.2);
+        }
+
+        .cta-btn {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 100px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-decoration: none;
+            display: inline-block;
+            box-shadow: 0 4px 15px rgba(16, 185, 129, 0.3);
+        }
+
+        .cta-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(16, 185, 129, 0.5);
+        }
+    </style>
+</head>
+
+<body class="relative overflow-x-hidden">
+
+    <!-- Transparent Immersive Navbar -->
+    <header class="transparent-navbar" id="mainNav">
+        <div class="navbar-content">
+            <!-- LEFT SIDE -->
+            <div class="logo-section">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-utensils text-sm"></i>
+                    </div>
+                    <span>Meal Buddy</span>
+                </div>
+                <div class="tagline">Your Favorite Food, Delivered.</div>
+            </div>
+            
+            <!-- RIGHT SIDE -->
+            <div class="nav-links">
+                <a href="{% url 'dining_home' username %}" class="nav-link-item"><i class="fas fa-utensils"></i> Dining</a>
+                <a href="{% url 'offers' username %}" class="nav-link-item"><i class="fas fa-percent"></i> Offers</a>
+                <a href="{% url 'order_history' username %}" class="nav-link-item"><i class="fas fa-history"></i> My Orders</a>
+                <a href="{% url 'show_cart' username %}" class="nav-link-item"><i class="fas fa-shopping-cart"></i> Cart</a>
+                
+                <div class="nav-divider"></div>
+                
+                <a href="{% url 'logout' %}" class="logout-btn">
+                    <i class="fas fa-sign-out-alt"></i> Logout
+                </a>
+                <div class="profile-btn" title="{{username}}">
+                    <i class="fas fa-user text-sm"></i>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <!-- Hero Section (Contains Background Video) -->
+    <div class="hero-wrapper">
+        <!-- Video Container -->
+        <div class="hero-video-container">
+            <!-- Ensure video is muted, looping, and playing inline -->
+            <video autoplay muted loop playsinline class="hero-video" id="bgVideo">
+                <source src="{% static 'delivery/images/food-bg.mp4' %}" type="video/mp4">
+            </video>
+            <!-- Overlays for cinematic effect & text readability -->
+            <div class="hero-overlay-dark"></div>
+            <div class="hero-overlay-glow"></div>
+            
+            <!-- Ambient Floating Glows -->
+            <div class="absolute top-1/4 left-[10%] w-96 h-96 bg-emerald-500/20 rounded-full blur-[120px] pointer-events-none animate-pulse" style="animation-duration: 8s;"></div>
+            <div class="absolute bottom-1/4 right-[10%] w-[500px] h-[500px] bg-teal-600/20 rounded-full blur-[150px] pointer-events-none animate-pulse" style="animation-duration: 12s; animation-delay: 2s;"></div>
+        </div>
+
+        <!-- Hero Content Layer -->
+        <div class="hero-content">
+            <div class="max-w-7xl mx-auto px-6">
+                <h1 class="text-5xl md:text-7xl mb-4 font-['Plus_Jakarta_Sans'] drop-shadow-2xl">
+                    <span class="font-light text-gray-200">Welcome Back,</span> <br/>
+                    <span class="font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-teal-200 tracking-tight">{{username}}</span> <span class="text-4xl">👋</span>
+                </h1>
+                <p class="text-gray-300 text-xl md:text-2xl max-w-2xl font-light drop-shadow-md mt-4">What are you craving today? Explore the finest restaurants delivering straight to your door.</p>
+
+                <!-- Modern Search Bar -->
+                <div class="search-container">
+                    <i class="fas fa-search z-10"></i>
+                    <input type="text" id="restaurantSearch" placeholder="Search for restaurants, cuisines, or dishes...">
+                </div>
+
+                <!-- Category Chips -->
+                <div class="flex gap-4 overflow-x-auto py-4 mt-2 no-scrollbar" style="scroll-behavior: smooth;">
+                    <button class="category-pill active">
+                        <i class="fas fa-fire"></i> Trending
+                    </button>
+                    <button class="category-pill">
+                        <i class="fas fa-pizza-slice"></i> Pizza
+                    </button>
+                    <button class="category-pill">
+                        <i class="fas fa-hamburger"></i> Burgers
+                    </button>
+                    <button class="category-pill">
+                        <i class="fas fa-leaf"></i> Healthy
+                    </button>
+                    <button class="category-pill">
+                        <i class="fas fa-ice-cream"></i> Desserts
+                    </button>
+                    <button class="category-pill">
+                        <i class="fas fa-coffee"></i> Beverages
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content (Restaurants Grid) -->
+    <main class="max-w-7xl mx-auto px-6 py-12 relative z-10">
+        <div class="flex items-center justify-between mb-10">
+            <h2 class="text-3xl md:text-4xl font-extrabold font-['Plus_Jakarta_Sans'] text-white">Featured <span class="text-emerald-400">Restaurants</span></h2>
+            <a href="#" class="text-emerald-400 font-semibold text-sm hover:text-emerald-300 transition-colors flex items-center gap-1">View All <i class="fas fa-arrow-right"></i></a>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8" id="restaurantGrid">
+            {% for r in restaurantList %}
+            <div class="restaurant-card group">
+                <div class="res-image-wrapper">
+                    <img src="{{ r.picture }}" alt="{{ r.name }}" class="res-image">
+                    <div class="rating-badge">
+                        <i class="fas fa-star"></i>
+                        {{ r.rating }}
+                    </div>
+                </div>
+                <div class="res-content">
+                    <span class="cuisine-tag">{{ r.cuisine }}</span>
+                    <h3 class="text-2xl font-bold mb-4 text-white group-hover:text-emerald-400 transition-colors">
+                        {{ r.name }}
+                    </h3>
+
+                    <div class="flex items-center justify-between mt-6">
+                        <div class="flex flex-col">
+                            <span class="text-gray-500 text-xs uppercase tracking-wider">Delivery Time</span>
+                            <span class="text-gray-300 font-semibold">25-35 min</span>
+                        </div>
+                        <a href="{% url 'view_menu' r.id username %}" class="cta-btn text-sm normal-case">
+                            View Menu
+                        </a>
+                    </div>
+                </div>
+                <!-- Ambient Glow Effect on Hover -->
+                <div class="absolute inset-0 bg-emerald-500/5 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none"></div>
+            </div>
+            {% empty %}
+            <div class="col-span-full py-20 text-center">
+                <div class="w-24 h-24 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-6">
+                    <i class="fas fa-utensils text-gray-500 text-4xl"></i>
+                </div>
+                <h2 class="text-2xl font-bold text-gray-400">No restaurants found yet.</h2>
+                <p class="text-gray-500 mt-2">We're expanding quickly to bring more flavors to you!</p>
+            </div>
+            {% endfor %}
+        </div>
+    </main>
+
+    <!-- Footer -->
+    <footer class="py-12 border-t border-white/5 bg-black/50 text-center text-gray-600 text-sm mt-10">
+        <p>&copy; 2026 Meal Buddy. All rights reserved. Crafted with precision.</p>
+    </footer>
+
+    <script>
+        // Navbar scroll effect for transparent to glass transition
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('mainNav');
+            if (window.scrollY > 50) {
+                nav.style.background = 'rgba(5, 5, 5, 0.9)';
+                nav.style.backdropFilter = 'blur(20px)';
+                nav.style.paddingBottom = '20px';
+                nav.style.boxShadow = '0 10px 30px rgba(0,0,0,0.5)';
+            } else {
+                nav.style.background = 'linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0) 100%)';
+                nav.style.backdropFilter = 'none';
+                nav.style.paddingBottom = '50px';
+                nav.style.boxShadow = 'none';
+            }
+        });
+
+        // Ensure video plays and loops reliably
+        document.addEventListener('DOMContentLoaded', () => {
+            const bgVideo = document.getElementById('bgVideo');
+            if (bgVideo) {
+                // Force muted for autoplay policies
+                bgVideo.muted = true;
+                bgVideo.play().catch(e => {
+                    console.log('Autoplay prevented, retrying on interaction...', e);
+                    document.body.addEventListener('click', () => {
+                        bgVideo.play();
+                    }, { once: true });
+                });
+            }
+        });
+
+        // Search filtering functionality
+        const searchInput = document.getElementById('restaurantSearch');
+        const restaurantCards = document.querySelectorAll('.restaurant-card');
+
+        searchInput.addEventListener('input', function (e) {
+            const query = e.target.value.toLowerCase();
+
+            restaurantCards.forEach(card => {
+                const name = card.querySelector('h3').innerText.toLowerCase();
+                const cuisine = card.querySelector('.cuisine-tag').innerText.toLowerCase();
+
+                if (name.includes(query) || cuisine.includes(query)) {
+                    card.style.display = 'block';
+                    card.style.animation = 'fadeInUp 0.5s ease-out forwards';
+                } else {
+                    card.style.display = 'none';
+                }
+            });
+        });
+
+        // Stagger fade-in animation to cards on load
+        document.addEventListener('DOMContentLoaded', () => {
+            restaurantCards.forEach((card, index) => {
+                card.style.opacity = '0';
+                card.style.transform = 'translateY(30px)';
+                setTimeout(() => {
+                    card.style.transition = 'all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275)';
+                    card.style.opacity = '1';
+                    card.style.transform = 'translateY(0)';
+                }, 100 * index);
+            });
+        });
+
+        // Category Pills Toggle Logic
+        const pills = document.querySelectorAll('.category-pill');
+        pills.forEach(pill => {
+            pill.addEventListener('click', () => {
+                pills.forEach(p => p.classList.remove('active'));
+                pill.classList.add('active');
+                
+                // Add simple filter visual feedback
+                const query = pill.innerText.trim().toLowerCase();
+                if (query === 'trending') {
+                    searchInput.value = '';
+                    searchInput.dispatchEvent(new Event('input'));
+                } else {
+                    searchInput.value = query;
+                    searchInput.dispatchEvent(new Event('input'));
+                }
+            });
+        });
+    </script>
+</body>
+
+</html>

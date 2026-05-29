@@ -1,0 +1,275 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meal Buddy | Your Favorite Food, Delivered.</title>
+    <link rel="stylesheet" href="{% static 'delivery/css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Make landing page elements indicate they are interactive */
+        body,
+        .hero-container,
+        .glass-card,
+        .cta-btn,
+        .search-wrapper,
+        .search-wrapper input,
+        header {
+            cursor: pointer !important;
+        }
+
+        /* ── Modern Toast Notification ── */
+        .toast-container {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            z-index: 9999;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-width: 380px;
+            width: calc(100% - 48px);
+            pointer-events: none;
+        }
+        .toast-card {
+            pointer-events: auto;
+            background: rgba(10, 10, 10, 0.85);
+            backdrop-filter: blur(16px) saturate(180%);
+            -webkit-backdrop-filter: blur(16px) saturate(180%);
+            border: 1px solid rgba(16, 185, 129, 0.35);
+            border-radius: 18px;
+            padding: 16px;
+            display: flex;
+            align-items: flex-start;
+            gap: 14px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 20px rgba(16, 185, 129, 0.08);
+            transform: translateY(-20px);
+            opacity: 0;
+            transition: transform 0.5s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.5s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .toast-card.show {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .toast-card.hide {
+            transform: translateY(-20px);
+            opacity: 0;
+        }
+        .toast-icon {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.25);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #10b981;
+            font-size: 1.1rem;
+            flex-shrink: 0;
+            box-shadow: 0 0 15px rgba(16, 185, 129, 0.15);
+        }
+        .toast-content {
+            flex: 1;
+        }
+        .toast-title {
+            font-weight: 700;
+            font-size: 0.95rem;
+            color: white;
+            margin-bottom: 2px;
+        }
+        .toast-message {
+            font-size: 0.85rem;
+            color: rgba(255, 255, 255, 0.7);
+            line-height: 1.4;
+        }
+    </style>
+</head>
+<body>
+    <!-- Top Navigation -->
+    <header>
+        <div class="logo-section">
+            <div class="logo">
+                <div class="logo-icon">
+                    <i class="fas fa-utensils text-black text-sm"></i>
+                </div>
+                <span>Meal Buddy</span>
+            </div>
+            <span class="tagline">Your Favorite Food, Delivered.</span>
+        </div>
+    </header>
+
+    <div class="hero-container">
+        <!-- Floating Recipe Cards - Symmetrical Layout -->
+        <div class="card-wrapper">
+            <!-- Top Left Quadrant -->
+            <div class="glass-card animate-float" style="top: 15%; left: 6%; animation-delay: 0s;">
+                <img src="{% static 'delivery/images/biryani.png' %}" alt="Biryani" class="card-img">
+                <span class="card-title">Biryani</span>
+                <div class="card-rating"><span class="star">★</span> 4.9</div>
+            </div>
+            <div class="glass-card animate-float" style="top: 45%; left: 4%; animation-delay: 1.5s;">
+                <img src="{% static 'delivery/images/shawarma.png' %}" alt="Shawarma" class="card-img">
+                <span class="card-title">Shawarma</span>
+                <div class="card-rating"><span class="star">★</span> 4.8</div>
+            </div>
+            <div class="glass-card animate-float" style="top: 72%; left: 8%; animation-delay: 0.8s;">
+                <img src="{% static 'delivery/images/rice_bowl.png' %}" alt="Rice Bowl" class="card-img">
+                <span class="card-title">Healthy Bowl</span>
+                <div class="card-rating"><span class="star">★</span> 4.6</div>
+            </div>
+            <div class="glass-card animate-float" style="top: 22%; left: 18%; animation-delay: 2.2s;">
+                <img src="{% static 'delivery/images/burger.png' %}" alt="Burger" class="card-img">
+                <span class="card-title">Gourmet Burger</span>
+                <div class="card-rating"><span class="star">★</span> 4.7</div>
+            </div>
+
+            <!-- Right Side -->
+            <div class="glass-card animate-float" style="top: 12%; right: 6%; animation-delay: 0.5s;">
+                <img src="{% static 'delivery/images/butter_chicken.png' %}" alt="Butter Chicken" class="card-img">
+                <span class="card-title">Butter Chicken</span>
+                <div class="card-rating"><span class="star">★</span> 4.9</div>
+            </div>
+            <div class="glass-card animate-float" style="top: 42%; right: 4%; animation-delay: 1.2s;">
+                <img src="{% static 'delivery/images/chicken_mandi.png' %}" alt="Chicken Mandi" class="card-img">
+                <span class="card-title">Chicken Mandi</span>
+                <div class="card-rating"><span class="star">★</span> 4.9</div>
+            </div>
+            <div class="glass-card animate-float" style="top: 70%; right: 8%; animation-delay: 2.5s;">
+                <img src="{% static 'delivery/images/roti.png' %}" alt="Roti" class="card-img">
+                <span class="card-title">Fresh Roti</span>
+                <div class="card-rating"><span class="star">★</span> 4.5</div>
+            </div>
+            <div class="glass-card animate-float" style="top: 20%; right: 18%; animation-delay: 1.8s;">
+                <img src="{% static 'delivery/images/smoothie_bowl.png' %}" alt="Smoothie Bowl" class="card-title">
+                <span class="card-title">Smoothie Bowl</span>
+                <div class="card-rating"><span class="star">★</span> 4.8</div>
+            </div>
+
+            <!-- Center Accents (Spread further to avoid central content) -->
+            <div class="glass-card animate-float" style="top: 2%; left: 40%; animation-delay: 0.2s;">
+                <img src="{% static 'delivery/images/noodles.png' %}" alt="Noodles" class="card-img">
+                <span class="card-title">Stir-fry Noodles</span>
+                <div class="card-rating"><span class="star">★</span> 4.7</div>
+            </div>
+            <div class="glass-card animate-float" style="bottom: 2%; left: 25%; animation-delay: 3s;">
+                <img src="{% static 'delivery/images/pasta.png' %}" alt="Pasta" class="card-img">
+                <span class="card-title">Creamy Pasta</span>
+                <div class="card-rating"><span class="star">★</span> 4.8</div>
+            </div>
+            <div class="glass-card animate-float" style="bottom: 5%; right: 30%; animation-delay: 1.5s;">
+                <img src="{% static 'delivery/images/salad.png' %}" alt="Salad" class="card-img">
+                <span class="card-title">Healthy Salad</span>
+                <div class="card-rating"><span class="star">★</span> 4.6</div>
+            </div>
+            <div class="glass-card animate-float" style="top: 8%; left: 25%; animation-delay: 2.8s; opacity: 0.6;">
+                <img src="{% static 'delivery/images/dessert.png' %}" alt="Dessert" class="card-img">
+                <span class="card-title">Dessert Sampler</span>
+                <div class="card-rating"><span class="star">★</span> 4.9</div>
+            </div>
+
+        </div>
+
+        <!-- Hero Content Overlay -->
+        <div class="content-box">
+            <h2 class="headline">
+                Order Delicious <br>
+                <span class="highlight">Meals Near You</span>
+            </h2>
+            <p class="subheading">
+                Experience lightning-fast delivery from the city's top-rated restaurants. <br>
+                Your favorite dishes, delivered fresh and hot to your doorstep.
+            </p>
+
+            <!-- Search Bar -->
+            <div class="search-wrapper">
+                <i class="fas fa-location-dot loc-icon"></i>
+                <input type="text" placeholder="Enter your delivery address...">
+            </div>
+
+            <!-- CTA Button -->
+            <a href="{% url 'open_signup' %}" class="cta-btn">
+                Start Ordering
+            </a>
+        </div>
+    </div>
+
+    <!-- Modern Glassmorphic Onboarding Toast -->
+    <div class="toast-container" id="onboardingToastContainer">
+        <div class="toast-card" id="onboardingToast">
+            <div class="toast-icon">
+                <i class="fas fa-user-plus"></i>
+            </div>
+            <div class="toast-content">
+                <div class="toast-title">Authentication Required</div>
+                <div class="toast-message">Please sign up or log in to continue exploring.</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Parallax Effect -->
+    <script>
+        document.addEventListener('mousemove', (e) => {
+            const cards = document.querySelectorAll('.glass-card');
+            const x = (window.innerWidth / 2 - e.pageX) / 60;
+            const y = (window.innerHeight / 2 - e.pageY) / 60;
+
+            cards.forEach((card, index) => {
+                const depth = (index % 4 + 1) * 0.3;
+                card.style.transform = `translateX(${x * depth}px) translateY(${y * depth}px) rotate(${x * 0.03}deg)`;
+            });
+        });
+
+        // Global Click Intercept & Onboarding Redirect
+        document.addEventListener('DOMContentLoaded', () => {
+            const redirectUrl = "{% url 'open_signup' %}";
+            let redirecting = false;
+
+            function triggerRedirect() {
+                if (redirecting) return;
+                redirecting = true;
+                
+                // Show custom elegant glassmorphic toast
+                const toast = document.getElementById('onboardingToast');
+                if (toast) {
+                    toast.classList.add('show');
+                }
+                
+                // Delay redirect by 1.2s to showcase the animation
+                setTimeout(() => {
+                    window.location.href = redirectUrl;
+                }, 1200);
+            }
+
+            // Bind click listeners to header, hero, search elements, and all recipe cards
+            const header = document.querySelector('header');
+            if (header) {
+                header.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    triggerRedirect();
+                });
+            }
+
+            const hero = document.querySelector('.hero-container');
+            if (hero) {
+                hero.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    triggerRedirect();
+                });
+            }
+
+            // Stop propagation on toast so clicking it doesn't re-trigger
+            const toast = document.getElementById('onboardingToast');
+            if (toast) {
+                toast.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                });
+            }
+        });
+    </script>
+</body>
+</html>

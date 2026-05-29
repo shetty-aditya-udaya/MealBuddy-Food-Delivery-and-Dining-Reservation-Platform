@@ -1,0 +1,283 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{{ restaurant.name }} | Meal Buddy Dining</title>
+    <link rel="stylesheet" href="{% static 'delivery/css/style.css' %}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body { background-color: #050505; color: #ffffff; }
+        .transparent-navbar {
+            position: fixed; top: 0; left: 0; width: 100%; z-index: 100;
+            background: linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0) 100%);
+            padding: 20px 0; transition: all 0.4s ease;
+        }
+        .navbar-content { display: flex; justify-content: space-between; align-items: center; width: 100%; padding: 0 40px; }
+        .logo { display: flex; align-items: center; gap: 10px; font-size: 1.5rem; font-weight: bold; color: white; text-decoration: none; }
+        .logo i { color: #eab308; }
+        .nav-links { display: flex; align-items: center; gap: 20px; }
+        .nav-links a { color: white; text-decoration: none; font-weight: 600; transition: color 0.3s; }
+        .nav-links a:hover { color: #eab308; }
+
+        .res-hero { position: relative; height: 60vh; width: 100%; overflow: hidden; }
+        .res-hero img { width: 100%; height: 100%; object-fit: cover; filter: brightness(0.6); }
+        .res-hero-overlay { position: absolute; inset: 0; background: linear-gradient(to top, #050505 0%, transparent 100%); z-index: 1; }
+        
+        .main-layout { display: flex; max-width: 1200px; margin: -100px auto 50px; position: relative; z-index: 10; gap: 40px; px: 20px; }
+        .content-left { flex: 1; }
+        .widget-right { width: 380px; position: sticky; top: 100px; align-self: flex-start; }
+
+        .res-title-card {
+            background: rgba(20, 20, 20, 0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 20px; padding: 30px; margin-bottom: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
+        .res-title { font-size: 3rem; font-weight: 800; margin-bottom: 10px; color: white; }
+        .res-meta { display: flex; flex-wrap: wrap; gap: 15px; color: #d1d5db; font-size: 1rem; margin-bottom: 20px; }
+        .res-meta span { display: flex; align-items: center; gap: 6px; }
+        .res-meta i { color: #eab308; }
+
+        .section-title { font-size: 1.5rem; font-weight: bold; margin-bottom: 15px; margin-top: 30px; color: #fff; border-bottom: 1px solid rgba(255,255,255,0.1); padding-bottom: 10px; }
+        .text-body { color: #9ca3af; line-height: 1.6; font-size: 1.05rem; }
+        
+        .feature-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px; margin-top: 20px; }
+        .feature-item { display: flex; align-items: center; gap: 10px; color: #d1d5db; }
+        .feature-item i { color: #10b981; width: 20px; text-align: center; }
+
+        /* Booking Widget */
+        .booking-widget {
+            background: rgba(30, 30, 30, 0.6); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(234, 179, 8, 0.3); border-radius: 20px; padding: 25px;
+            box-shadow: 0 15px 40px rgba(0,0,0,0.6);
+        }
+        .widget-title { font-size: 1.4rem; font-weight: bold; margin-bottom: 20px; text-align: center; color: white; }
+        .form-group { margin-bottom: 15px; }
+        .form-group label { display: block; margin-bottom: 8px; color: #d1d5db; font-size: 0.9rem; }
+        .form-control {
+            width: 100%; padding: 12px; border-radius: 10px; border: 1px solid rgba(255,255,255,0.2);
+            background: rgba(0,0,0,0.5); color: white; color-scheme: dark; font-size: 1rem; outline: none; transition: all 0.3s;
+        }
+        .form-control:focus { border-color: #eab308; box-shadow: 0 0 10px rgba(234, 179, 8, 0.3); }
+        .book-btn {
+            width: 100%; padding: 15px; border-radius: 100px; background: linear-gradient(135deg, #eab308 0%, #ca8a04 100%);
+            color: #000; font-weight: bold; font-size: 1.1rem; border: none; cursor: pointer; transition: all 0.3s;
+            margin-top: 10px; box-shadow: 0 5px 15px rgba(234, 179, 8, 0.4);
+        }
+        .book-btn:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(234, 179, 8, 0.6); }
+
+        /* Modal */
+        #successModal { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.8); backdrop-filter: blur(5px); z-index: 1000; align-items: center; justify-content: center; }
+        .modal-content { background: #111; padding: 40px; border-radius: 20px; text-align: center; border: 1px solid #eab308; max-width: 400px; width: 90%; }
+        .modal-content i { font-size: 4rem; color: #10b981; margin-bottom: 20px; }
+        .modal-title { font-size: 1.8rem; font-weight: bold; margin-bottom: 10px; }
+        .modal-text { color: #9ca3af; margin-bottom: 20px; }
+        .modal-btn { background: #eab308; color: #000; padding: 10px 20px; border-radius: 100px; font-weight: bold; text-decoration: none; display: inline-block; }
+    </style>
+</head>
+<body>
+
+    <header class="transparent-navbar" id="mainNav">
+        <div class="navbar-content">
+            <a href="{% url 'dining_home' username %}" class="logo">
+                <i class="fas fa-arrow-left"></i> Meal Buddy Dining
+            </a>
+            <div class="nav-links">
+                <a href="{% url 'my_reservations' username %}">Bookings</a>
+                <div title="{{username}}" style="width: 35px; height: 35px; background: #333; border-radius: 50%; display: flex; align-items: center; justify-content: center;"><i class="fas fa-user"></i></div>
+            </div>
+        </div>
+    </header>
+
+    <div class="res-hero">
+        <img src="{{ restaurant.cover_image }}" alt="{{ restaurant.name }}">
+        <div class="res-hero-overlay"></div>
+    </div>
+
+    <div class="main-layout px-4">
+        <div class="content-left">
+            <div class="res-title-card">
+                <h1 class="res-title">{{ restaurant.name }}</h1>
+                <div class="res-meta">
+                    <span><i class="fas fa-star"></i> {{ restaurant.rating }} ({{ restaurant.total_reviews }} Reviews)</span>
+                    <span><i class="fas fa-utensils"></i> {{ restaurant.cuisine }}</span>
+                    <span><i class="fas fa-wallet"></i> ₹{{ restaurant.price_for_two }} for two</span>
+                    <span><i class="fas fa-clock"></i> {{ restaurant.opening_time|time:"h:i A" }} - {{ restaurant.closing_time|time:"h:i A" }}</span>
+                </div>
+                
+                {% if restaurant.categories.all %}
+                <div class="flex gap-2 flex-wrap mb-4">
+                    {% for cat in restaurant.categories.all %}
+                    <span class="bg-yellow-500/10 text-yellow-500 border border-yellow-500/20 px-3 py-1 rounded-full text-sm font-semibold">
+                        {% if cat.icon %}<i class="{{ cat.icon }}"></i> {% endif %}{{ cat.name }}
+                    </span>
+                    {% endfor %}
+                </div>
+                {% endif %}
+                
+                <div style="color: #9ca3af;"><i class="fas fa-map-marker-alt text-yellow-500"></i> {{ restaurant.address }}{% if restaurant.city %}, {{ restaurant.city }}{% endif %}</div>
+                
+                {% if active_offers %}
+                <div class="mt-4 flex flex-col gap-2">
+                    {% for offer in active_offers %}
+                    <div class="inline-block bg-red-900/50 text-red-400 border border-red-500/30 px-4 py-2 rounded-lg font-bold w-fit">
+                        <i class="fas fa-gift"></i> {{ offer.title }} - {% if offer.coupon_code %}Code: {{ offer.coupon_code }} ({{ offer.discount_percent }}% OFF){% else %}{{ offer.discount_percent }}% OFF{% endif %}
+                    </div>
+                    {% endfor %}
+                </div>
+                {% elif restaurant.dining_offer %}
+                <div class="mt-4 inline-block bg-red-900/50 text-red-400 border border-red-500/30 px-4 py-2 rounded-lg font-bold">
+                    <i class="fas fa-gift"></i> {{ restaurant.dining_offer }}
+                </div>
+                {% endif %}
+            </div>
+
+            <h2 class="section-title">About the Restaurant</h2>
+            <p class="text-body">{{ restaurant.description|default:"Experience the finest culinary delights in a premium ambiance. Perfect for your special occasions and casual dining." }}</p>
+
+            <h2 class="section-title">Facilities & Ambience</h2>
+            <div class="feature-grid">
+                {% if restaurant.indoor_seating or not restaurant.outdoor_seating %}<div class="feature-item"><i class="fas fa-check"></i> Indoor Seating</div>{% endif %}
+                {% if restaurant.outdoor_seating %}<div class="feature-item"><i class="fas fa-check"></i> Outdoor Seating</div>{% endif %}
+                {% if restaurant.rooftop %}<div class="feature-item"><i class="fas fa-check"></i> Rooftop View</div>{% endif %}
+                {% if restaurant.live_music %}<div class="feature-item"><i class="fas fa-check"></i> Live Music</div>{% endif %}
+                {% if restaurant.valet_parking %}<div class="feature-item"><i class="fas fa-check"></i> Valet Parking</div>{% endif %}
+                {% if restaurant.smoking_zone %}<div class="feature-item"><i class="fas fa-check"></i> Smoking Zone</div>{% endif %}
+                {% if restaurant.kids_friendly %}<div class="feature-item"><i class="fas fa-check"></i> Kids Friendly</div>{% endif %}
+                {% if restaurant.pet_friendly %}<div class="feature-item"><i class="fas fa-check"></i> Pet Friendly</div>{% endif %}
+                {% if restaurant.pure_veg %}<div class="feature-item"><i class="fas fa-leaf"></i> Pure Veg</div>{% endif %}
+                {% if restaurant.serves_alcohol %}<div class="feature-item"><i class="fas fa-glass-martini-alt"></i> Serves Alcohol</div>{% endif %}
+            </div>
+            
+            <!-- Menu Preview or Image Gallery could go here -->
+            <h2 class="section-title mt-10">Photos</h2>
+            <div class="grid grid-cols-2 md:grid-cols-3 gap-4 mt-4">
+                <img src="{{ restaurant.image }}" class="rounded-lg w-full h-32 object-cover hover:scale-105 transition-transform" alt="Photo">
+                <img src="https://images.unsplash.com/photo-1414235077428-338989a2e8c0?q=80&w=500" class="rounded-lg w-full h-32 object-cover hover:scale-105 transition-transform" alt="Photo">
+                <img src="https://images.unsplash.com/photo-1550966871-3ed3cdb5ed0c?q=80&w=500" class="rounded-lg w-full h-32 object-cover hover:scale-105 transition-transform" alt="Photo">
+            </div>
+        </div>
+
+        <div class="widget-right">
+            <div class="booking-widget">
+                <h3 class="widget-title">Reserve a Table</h3>
+                <form id="bookingForm">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label>Date</label>
+                        <input type="date" id="bDate" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Time</label>
+                        <select id="bTime" class="form-control" required>
+                            <option value="">Select Time</option>
+                            <option value="12:00:00">12:00 PM</option>
+                            <option value="13:00:00">1:00 PM</option>
+                            <option value="19:00:00">7:00 PM</option>
+                            <option value="20:00:00">8:00 PM</option>
+                            <option value="21:00:00">9:00 PM</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Guests</label>
+                        <select id="bGuests" class="form-control">
+                            <option value="2">2 People</option>
+                            <option value="3">3 People</option>
+                            <option value="4">4 People</option>
+                            <option value="5">5 People</option>
+                            <option value="6">6+ People</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Occasion (Optional)</label>
+                        <select id="bOccasion" class="form-control">
+                            <option value="">None</option>
+                            <option value="Birthday">Birthday</option>
+                            <option value="Anniversary">Anniversary</option>
+                            <option value="Date">Date</option>
+                            <option value="Business">Business</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Special Requests</label>
+                        <textarea id="bRequest" class="form-control" rows="2" placeholder="E.g. Window seat..."></textarea>
+                    </div>
+                    <button type="submit" class="book-btn">Confirm Reservation</button>
+                    <p id="bError" style="color: #ef4444; margin-top: 10px; display: none; text-align: center;"></p>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Success Modal -->
+    <div id="successModal">
+        <div class="modal-content">
+            <i class="fas fa-check-circle"></i>
+            <h2 class="modal-title">Booking Confirmed!</h2>
+            <p class="modal-text">Your table at {{ restaurant.name }} has been reserved successfully.</p>
+            <a href="{% url 'my_reservations' username %}" class="modal-btn">View My Bookings</a>
+        </div>
+    </div>
+
+    <script>
+        // Set min date to today
+        const today = new Date().toISOString().split('T')[0];
+        document.getElementById('bDate').setAttribute('min', today);
+        document.getElementById('bDate').value = today;
+
+        document.getElementById('bookingForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const btn = document.querySelector('.book-btn');
+            btn.textContent = 'Processing...';
+            btn.disabled = true;
+
+            const data = {
+                date: document.getElementById('bDate').value,
+                time: document.getElementById('bTime').value,
+                guests: document.getElementById('bGuests').value,
+                occasion: document.getElementById('bOccasion').value,
+                special_request: document.getElementById('bRequest').value,
+            };
+
+            try {
+                const response = await fetch("{% url 'book_table' restaurant.id username %}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': document.querySelector('[name=csrfmiddlewaretoken]').value
+                    },
+                    body: JSON.stringify(data)
+                });
+                const result = await response.json();
+                
+                if (result.success) {
+                    window.location.href = result.redirect;
+                } else {
+                    const err = document.getElementById('bError');
+                    err.textContent = result.message;
+                    err.style.display = 'block';
+                    btn.textContent = 'Confirm Reservation';
+                    btn.disabled = false;
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                btn.textContent = 'Confirm Reservation';
+                btn.disabled = false;
+            }
+        });
+
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('mainNav');
+            if (window.scrollY > 50) {
+                nav.style.background = 'rgba(5, 5, 5, 0.9)';
+                nav.style.backdropFilter = 'blur(20px)';
+            } else {
+                nav.style.background = 'linear-gradient(to bottom, rgba(0,0,0,0.9) 0%, rgba(0,0,0,0.4) 60%, rgba(0,0,0,0) 100%)';
+                nav.style.backdropFilter = 'none';
+            }
+        });
+    </script>
+</body>
+</html>
