@@ -7,6 +7,16 @@
 
 A premium, production-grade **Full-Stack Django SaaS Application** featuring a dual-service engine: **On-Demand Food Delivery** and **Dynamic Dining Table Reservation**. Designed with sleek glassmorphic aesthetics, robust session security, dynamic promo codes, and a fully integrated Razorpay payment gateway checkout flow.
 
+## 📸 Application Preview
+
+<p align="center">
+  <img src="landingpage.png" alt="Meal Buddy Landing Page" width="100%">
+</p>
+
+<p align="center">
+  <b>Premium Dark-Themed Food Delivery & Dining Reservation Experience</b>
+</p>
+
 ---
 
 ## 🏗️ System Architecture & Workflow
