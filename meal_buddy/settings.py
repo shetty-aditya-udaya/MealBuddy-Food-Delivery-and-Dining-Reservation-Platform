@@ -35,6 +35,10 @@ DEBUG = os.environ.get('DEBUG', 'False').lower() == 'true'
 allowed_hosts_str = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,your-app-name.onrender.com,*.onrender.com')
 ALLOWED_HOSTS = [host.strip() for host in allowed_hosts_str.split(',') if host.strip()]
 
+# CSRF Trusted Origins for Production Validation
+csrf_trusted = os.environ.get("CSRF_TRUSTED_ORIGINS")
+CSRF_TRUSTED_ORIGINS = [origin.strip() for origin in csrf_trusted.split(',') if origin.strip()] if csrf_trusted else []
+
 
 # Application definition
 
