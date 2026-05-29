@@ -286,6 +286,6 @@ Visit the local server sandbox at `http://127.0.0.1:8000/` inside your browser.
 
 ## 📬 Contact and Showcases
 
-*   **Developer:** Aditya Udaya Shetty
+*   **Developer:** Shetty Aditya Udaya
 *   **GitHub:** [@shetty-aditya-udaya](https://github.com/shetty-aditya-udaya)
 *   **Project Link:** [Meal Buddy Repository](https://github.com/shetty-aditya-udaya/MealBuddy-Food-Delivery-and-Dining-Reservation-Platform)
